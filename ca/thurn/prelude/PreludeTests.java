@@ -136,6 +136,11 @@ public class PreludeTests {
             P.<Character>concat(),
             s(""),
             $(s("1"), s("2"), s("3"))));
+    assertEquals(new Integer(0),
+        foldl(
+            minus(),
+            10,
+            $(5, 3, 2)));
   }
 
   @Test public final void testFoldl1() {
@@ -157,6 +162,54 @@ public class PreludeTests {
             $(s("1"), s("2"), s("3"))));
   }
 
+  @Test public final void testFoldr() {
+    assertEquals(new Integer(-6),
+        foldr(
+            minus(),
+            10,
+            $(5, 3, 2)));
+    assertElementsEqual($(1, 2, 3, 0),
+        foldr(
+            P.<Integer>concat(),
+            $(0),
+            $($(1), $(2), $(3))));
+    assertEquals(true,
+        foldr(
+            and(),
+            true,
+            $(true, true, true)
+            ));
+    assertEquals(true,
+        foldr(
+            or(),
+            false,
+            $(false, false, true)
+            ));
+  }
+
+  @Test public final void testFoldr1() {
+    assertEquals(new Integer(-6),
+        foldr1(
+            minus(),
+            $(5, 3, 2, 10)));
+    assertElementsEqual($(1, 2, 3, 0),
+        foldr1(
+            P.<Integer>concat(),
+            $($(1), $(2), $(3), $(0))));
+  }
+
+  @Test public final void testAndList() {
+    assertEquals(true, andList($(true, true, true)));
+    assertEquals(false, andList($(true, false, true)));
+    assertEquals(true, andList(P.<Boolean>$()));
+  }
+
+  @Test public final void testOrList() {
+    assertEquals(true, orList($(true, true, true)));
+    assertEquals(true, orList($(true, false, true)));
+    assertEquals(false, orList($(false, false, false)));
+    assertEquals(false, orList(P.<Boolean>$()));
+  }
 
 
 

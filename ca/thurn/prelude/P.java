@@ -42,7 +42,8 @@ public class P {
     else return function.apply(input.value);
   }
 
-  public static <A,B> Function<Maybe<A>,B> maybe(final B defaultValue, final Function<A,B> function) {
+  public static <A,B> Function<Maybe<A>,B> maybe(final B defaultValue,
+      final Function<A,B> function) {
     return new Function<Maybe<A>,B>() {
       @Override public B apply(Maybe<A> input) {
         return maybe(defaultValue, function, input);
@@ -124,7 +125,8 @@ public class P {
     };
   }
 
-  public static <A,B,C> Function<Function<A,C>,Function<Function<B,C>,Function<Either<A,B>,C>>> either() {
+  public static <A,B,C> Function<Function<A,C>,Function<Function<B,C>,Function<Either<A,B>,C>>>
+  either() {
     return new Function<Function<A,C>,Function<Function<B,C>,Function<Either<A,B>,C>>>() {
       @Override public Function<Function<B,C>,Function<Either<A,B>,C>> apply(Function<A,C> value) {
         return either(value);
@@ -132,6 +134,16 @@ public class P {
     };
   }
 
+  /**
+   * Adds two integers.
+   *
+   * <p><b>Time Complexity:</b> O(1)</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param x First integer.
+   * @param y Second integer.
+   * @return Result of addition.
+   */
   public static Integer plus(Integer x, Integer y) {
     return x + y;
   }
@@ -158,6 +170,52 @@ public class P {
     };
   }
 
+  /**
+   * Subtracts two integers.
+   *
+   * <p><b>Time Complexity:</b> O(1)</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param x First integer
+   * @param y Second integer
+   * @return x Result of subtraction
+   */
+  public static Integer minus(Integer x, Integer y) {
+    return x - y;
+  }
+
+  /**
+   * Partially applied version of {@link P#minus(Integer, Integer)}.
+   */
+  public static Function<Integer,Integer> minus(final Integer x) {
+    return new Function<Integer,Integer>() {
+      @Override public Integer apply(Integer value) {
+        return minus(x, value);
+      }
+    };
+  }
+
+  /**
+   * Partially applied version of {@link P#minus(Integer, Integer)}.
+   */
+  public static Function<Integer,Function<Integer,Integer>> minus() {
+    return new Function<Integer,Function<Integer,Integer>>() {
+      @Override public Function<Integer,Integer> apply(Integer value) {
+        return minus(value);
+      }
+    };
+  }
+
+  /**
+   * Checks if x is less than y.
+   *
+   * <p><b>Time Complexity:</b> O(1)</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param x First comparable value.
+   * @param y Second comparable value.
+   * @return True if x is less than y.
+   */
   public static <A extends Comparable<A>> Boolean lt(A x, A y) {
     return x.compareTo(y) < 0;
   }
@@ -180,6 +238,78 @@ public class P {
     return new Function<A,Function<A,Boolean>>() {
       @Override public Function<A,Boolean> apply(A value) {
         return lt(value);
+      }
+    };
+  }
+
+  /**
+   * The boolean conjunction of two boolean values.
+   *
+   * <p><b>Time Complexity:</b> O(1)</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param x First boolean.
+   * @param y Second boolean.
+   * @return The conjunction ("and") of x and y.
+   */
+  public static Boolean and(Boolean x, Boolean y) {
+    return x && y;
+  }
+
+  /**
+   * Partially applied version of {@link P#and(Boolean, Boolean)}.
+   */
+  public static Function<Boolean,Boolean> and(final Boolean x) {
+    return new Function<Boolean,Boolean>() {
+      @Override public Boolean apply(Boolean value) {
+        return and(x, value);
+      }
+    };
+  }
+
+  /**
+   * Partially applied version of {@link P#and(Boolean, Boolean)}.
+   */
+  public static <types> Function<Boolean,Function<Boolean,Boolean>> and() {
+    return new Function<Boolean,Function<Boolean,Boolean>>() {
+      @Override public Function<Boolean,Boolean> apply(Boolean value) {
+        return and(value);
+      }
+    };
+  }
+
+  /**
+   * The boolean disjunction of two values.
+   *
+   * <p><b>Time Complexity:</b> O(1)</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param x First boolean.
+   * @param y Second boolean.
+   * @return The disjunction ("or") of x and y.
+   */
+  public static Boolean or(Boolean x, Boolean y) {
+    return x || y;
+  }
+
+  /**
+   * Partially applied version of {@link P#or(Boolean, Boolean)}.
+   */
+  public static Function<Boolean,Boolean> or(final Boolean x) {
+    return new Function<Boolean,Boolean>() {
+      @Override public Boolean apply(Boolean value) {
+        return or(x, value);
+      }
+    };
+  }
+
+  /**
+   * Partially applied version of {@link P#or(Boolean, Boolean)}.
+   */
+  public static Function<Boolean,Function<Boolean,Boolean>> or() {
+    return new Function<Boolean,Function<Boolean,Boolean>>() {
+      @Override public Function<Boolean,Boolean> apply(Boolean value) {
+        return or(value);
       }
     };
   }
@@ -683,7 +813,7 @@ public class P {
   /**
    * Extract the last element of an Iterable, which must be finite and non-empty.
    *
-   * <p><b>Time Complexity:</b> O(1)</p>
+   * <p><b>Time Complexity:</b> O(length(xs))</p>
    * <p><b>Space Complexity:</b> O(1)</p>
    *
    * @param xs Iterable to extract from.
@@ -707,7 +837,8 @@ public class P {
 
   /**
    * Extract the elements after the head of an Iterable, which must be
-   * non-empty. The resulting Iterable is unmodifiable.
+   * non-empty. The resulting Iterable is unmodifiable. Mutating xs after
+   * passing it to this function causes undefined behavior.
    *
    * <p><b>Time Complexity:</b> O(1)</p>
    * <p><b>Space Complexity:</b> O(1)</p>
@@ -739,7 +870,8 @@ public class P {
 
   /**
    * Return all the elements of an Iterable except the last one. The Iterable
-   * must be non-empty. The resulting Iterable is unmodifiable.
+   * must be non-empty. The resulting Iterable is unmodifiable. Mutating xs
+   * after passing it to this function causes undefined behavior.
    *
    * <p><b>Time Complexity:</b> O(1)</p>
    * <p><b>Space Complexity:</b> O(1)</p>
@@ -861,11 +993,11 @@ public class P {
    * <p><b>Time Complexity: O(length(xs))</b></p>
    * <p><b>Space Complexity: O(1)</b></p>
    *
-   * @param fn The binary operator to apply between each element of xs
-   * @param a The initial value (conceptually placed before the first binary operator)
+   * @param fn The binary operator to apply between each element of xs.
+   * @param a The initial value.
    * @param xs The list.
-   * @return a `fn` x1 `fn` x2 ... `fn` xn - where `fn` is the infix invocation
-   *     of the binary operator function.
+   * @return (...((a `fn` x1) `fn` x2) `fn`...) `f` xn - where `fn` is the
+   *     infix invocation of the binary operator function.
    */
   public static <A,B> A foldl(Function<A,Function<B,A>> fn, A a, Iterable<B> xs) {
     A result = a;
@@ -889,7 +1021,8 @@ public class P {
   /**
    * Partially applied version of {@link P#foldl(Function, Object, Iterable)}.
    */
-  public static <A,B> Function<A,Function<Iterable<B>,A>> foldl(final Function<A,Function<B,A>> fn) {
+  public static <A,B> Function<A,Function<Iterable<B>,A>> foldl(
+      final Function<A,Function<B,A>> fn) {
     return new Function<A,Function<Iterable<B>,A>>() {
       @Override public Function<Iterable<B>,A> apply(A value) {
         return foldl(fn, value);
@@ -901,7 +1034,7 @@ public class P {
    * Partially applied version of {@link P#foldl(Function, Object, Iterable)}.
    */
   public static <A,B> Function<Function<A,Function<B,A>>,Function<A,Function<Iterable<B>,A>>>
-      foldl() {
+  foldl() {
     return new Function<Function<A,Function<B,A>>,Function<A,Function<Iterable<B>,A>>>() {
       @Override public Function<A,Function<Iterable<B>,A>> apply(Function<A,Function<B,A>> value) {
         return foldl(value);
@@ -910,16 +1043,17 @@ public class P {
   }
 
   /**
-   * foldl1 is a variant of foldl that has no starting value argument, and thus
-   * must be applied to non-empty lists.
+   * foldl1 is a variant of {@link P#foldl(Function, Object, Iterable)} that
+   * has no starting value argument, and thus must be applied to finite
+   * non-empty lists.
    *
    * <p><b>Time Complexity: O(length(xs))</b></p>
    * <p><b>Space Complexity: O(1)</b></p>
    *
    * @param fn The binary operator to apply between each element of xs.
    * @param xs The list.
-   * @return x1 `fn` x2 ... `fn` xn  - where `fn` is the infix invocation of
-   *     the binary operator function.
+   * @return (...((x1 `fn` x2) `fn` x3) `fn`...) `f` xn - where `fn` is the
+   *     infix invocation of the binary operator function.
    */
   public static <A> A foldl1(Function<A,Function<A,A>> fn, Iterable<A> xs) {
     checkNotEmpty(xs);
@@ -948,9 +1082,155 @@ public class P {
     };
   }
 
+  /**
+   * foldr, applied to a binary operator, a starting value (typically the
+   * right-identity of the operator), and an Iterable, reduces the Iterable
+   * using the binary operator, from right to left. This is a strict
+   * implementation, so it must be applied to a finite list.
+   *
+   * <p><b>Time Complexity:</b> O(length(xs))</p>
+   * <p><b>Space Complexity:</b> O(length(xs))</p>
+   *
+   * @param fn The binary operator to apply between the elements of xs
+   * @param b The initial value (conceptually placed after the last binary
+   *     operator)
+   * @param xs The list.
+   * @return x1 `f` (x2 `f` ... (xn `f` a)...) - where `fn` is the infix
+   *     invocation of the binary operator function.
+   */
+  public static <A,B> B foldr(Function<A,Function<B,B>> fn, B b, Iterable<A> xs) {
+    B result = b;
+    for (A x : reverse(xs)) {
+      result = fn.apply(x).apply(result);
+    }
+    return result;
+  }
 
+  /**
+   * Partially applied version of {@link P#foldr(Function, Object, Iterable)}.
+   */
+  public static <A,B> Function<Iterable<A>,B> foldr(final Function<A,Function<B,B>> fn, final B b) {
+    return new Function<Iterable<A>,B>() {
+      @Override public B apply(Iterable<A> value) {
+        return foldr(fn, b, value);
+      }
+    };
+  }
 
+  /**
+   * Partially applied version of {@link P#foldr(Function, Object, Iterable)}.
+   */
+  public static <A,B> Function<B,Function<Iterable<A>,B>> foldr(
+      final Function<A,Function<B,B>> fn) {
+    return new Function<B,Function<Iterable<A>,B>>() {
+      @Override public Function<Iterable<A>,B> apply(B value) {
+        return foldr(fn, value);
+      }
+    };
+  }
 
+  /**
+   * Partially applied version of {@link P#foldr(Function, Object, Iterable)}.
+   */
+  public static <A,B> Function<Function<A,Function<B,B>>,Function<B,Function<Iterable<A>,B>>>
+  foldr() {
+    return new Function<Function<A,Function<B,B>>,Function<B,Function<Iterable<A>,B>>>() {
+      @Override public Function<B,Function<Iterable<A>,B>> apply(Function<A,Function<B,B>> value) {
+        return foldr(value);
+      }
+    };
+  }
+
+  /**
+   * foldr1 is a variant of foldr that has no starting value argument, and thus
+   * must be applied to finite non-empty lists.
+   *
+   * <p><b>Time Complexity:</b> O(length(xs))</p>
+   * <p><b>Space Complexity:</b> O(length(xs))</p>
+   *
+   * @param fn The binary operator to apply between the elements of xs
+   * @param xs The list.
+   * @return x1 `f` (x2 `f` ... (xn-1 `f` xn)...) - where `fn` is the infix
+   *     invocation of the binary operator function.
+   */
+  public static <A> A foldr1(Function<A,Function<A,A>> fn, Iterable<A> xs) {
+    checkNotEmpty(xs);
+    return foldr(fn, last(xs), init(xs));
+  }
+
+  /**
+   * Partially applied version of {@link P#foldr1(Function, Iterable)}.
+   */
+  public static <A> Function<Iterable<A>,A> foldr1(final Function<A,Function<A,A>> fn) {
+    return new Function<Iterable<A>,A>() {
+      @Override public A apply(Iterable<A> value) {
+        return foldr1(fn, value);
+      }
+    };
+  }
+
+  /**
+   * Partially applied version of {@link P#foldr1(Function, Iterable)}.
+   */
+  public static <A> Function<Function<A,Function<A,A>>,Function<Iterable<A>,A>> foldr1() {
+    return new Function<Function<A,Function<A,A>>,Function<Iterable<A>,A>>() {
+      @Override public Function<Iterable<A>,A> apply(Function<A,Function<A,A>> value) {
+        return foldr1(value);
+      }
+    };
+  }
+
+  /**
+   * andList returns the conjunction of a Boolean list, which must be finite.
+   * This function is called 'and' in Haskell, but that name was used here for
+   * the function Haskell calls (&&).
+   *
+   * <p><b>Time Complexity:</b> O(length(xs))</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param xs List of booleans.
+   * @return x1 && x2 && ... xn
+   */
+  public static Boolean andList(Iterable<Boolean> xs) {
+    return foldl(and(), true, xs);
+  }
+
+  /**
+   * Partially applied version of {@link P#andList(Iterable)}.
+   */
+  public static Function<Iterable<Boolean>,Boolean> andList() {
+    return new Function<Iterable<Boolean>,Boolean>() {
+      @Override public Boolean apply(Iterable<Boolean> value) {
+        return andList(value);
+      }
+    };
+  }
+
+  /**
+   * orList returns the disjunction of a Boolean list, which must be finite.
+   * This function is called 'or' in Haskell, but that name was used here for
+   * the function Haskell calls (||).
+   *
+   * <p><b>Time Complexity:</b> O(length(xs))</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param xs List of booleans.
+   * @return x1 || x2 || ... xn
+   */
+  public static Boolean orList(Iterable<Boolean> xs) {
+    return foldl(or(), false, xs);
+  }
+
+  /**
+   * Partially applied version of {@link P#orList(Iterable)}.
+   */
+  public static <types> Function<Iterable<Boolean>,Boolean> orList() {
+    return new Function<Iterable<Boolean>,Boolean>() {
+      @Override public Boolean apply(Iterable<Boolean> value) {
+        return orList(value);
+      }
+    };
+  }
 
 
 
