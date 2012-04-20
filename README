@@ -1,0 +1,4 @@
+This is an implementation of the Haskell prelude in Java. Obviously,
+there are a number of limitations in Java's syntax and type system that
+prevent a full port, but many of the key functions and concepts can be
+represented.
