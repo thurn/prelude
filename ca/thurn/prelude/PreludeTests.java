@@ -211,6 +211,29 @@ public class PreludeTests {
     assertEquals(false, orList(P.<Boolean>$()));
   }
 
+  @Test public final void testAny() {
+    assertEquals(true, any(even(), $(1, 2, 3)));
+    assertEquals(false, any(even(), $(1, 3, 5)));
+    assertEquals(false, any(even(), P.<Integer>$()));
+  }
+
+  @Test public final void testAll() {
+    assertEquals(true, all(even(), $(2, 4, 6)));
+    assertEquals(false, all(even(), $(1, 2, 3)));
+    assertEquals(true, all(even(), P.<Integer>$()));
+  }
+
+  @Test public final void testSum() {
+    assertEquals(new Integer(6), sum($(1, 2, 3)));
+    assertEquals(new Integer(-6), sum($(-1, -2, -3)));
+    assertEquals(new Integer(0), sum(P.<Integer>$()));
+  }
+
+  @Test public final void testProduct() {
+    assertEquals(new Integer(24), product($(1, 2, 3, 4)));
+    assertEquals(new Integer(24), product($(-1, 2, -3, 4)));
+    assertEquals(new Integer(1), product(P.<Integer>$()));
+  }
 
 
 

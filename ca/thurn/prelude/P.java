@@ -162,10 +162,46 @@ public class P {
   /**
    * Partially applied version of {@link P#plus(Integer, Integer)}.
    */
-  public static <types> Function<Integer,Function<Integer,Integer>> plus() {
+  public static Function<Integer,Function<Integer,Integer>> plus() {
     return new Function<Integer,Function<Integer,Integer>>() {
       @Override public Function<Integer,Integer> apply(Integer value) {
         return plus(value);
+      }
+    };
+  }
+
+  /**
+   * Multiplies two integers.
+   *
+   * <p><b>Time Complexity:</b> O(1)</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param x First integer.
+   * @param y Second integer.
+   * @return Product of x and y.
+   */
+  public static Integer times(Integer x, Integer y) {
+    return x * y;
+  }
+
+  /**
+   * Partially applied version of {@link P#times(Integer, Integer)}.
+   */
+  public static Function<Integer,Integer> times(final Integer x) {
+    return new Function<Integer,Integer>() {
+      @Override public Integer apply(Integer value) {
+        return times(x, value);
+      }
+    };
+  }
+
+  /**
+   * Partially applied version of {@link P#times(Integer, Integer)}.
+   */
+  public static Function<Integer,Function<Integer,Integer>> times() {
+    return new Function<Integer,Function<Integer,Integer>>() {
+      @Override public Function<Integer,Integer> apply(Integer value) {
+        return times(value);
       }
     };
   }
@@ -513,6 +549,55 @@ public class P {
     };
   }
 
+  /**
+   * Checks if an integer is even.
+   *
+   * <p><b>Time Complexity:</b> O(1)</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param x Integer to check
+   * @return True if the integer is even.
+   */
+  public static Boolean even(Integer x) {
+    return x % 2 == 0;
+  }
+
+  /**
+   * Partially applied version of {@link P#even(Integer)}.
+   */
+  public static Function<Integer,Boolean> even() {
+    return new Function<Integer,Boolean>() {
+      @Override public Boolean apply(Integer value) {
+        return even(value);
+      }
+    };
+  }
+
+  /**
+   * Checks if an integer is odd.
+   *
+   * <p><b>Time Complexity:</b> O(1)</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param x Integer to check
+   * @return True if the integer is odd.
+   */
+  public static Boolean odd(Integer x) {
+    return x % 2 != 0;
+  }
+
+  /**
+   * Partially applied version of {@link P#even(Integer)}.
+   */
+  public static Function<Integer,Boolean> odd() {
+    return new Function<Integer,Boolean>() {
+      @Override public Boolean apply(Integer value) {
+        return even(value);
+      }
+    };
+  }
+
+
   public static <A extends Comparable<A>> Integer compare(A x, A y) {
     return x.compareTo(y);
   }
@@ -663,7 +748,7 @@ public class P {
     };
   }
 
-  public static <A> A until(Predicate<A> pred, Function<A,A> fn, A a) {
+  public static <A> A until(Function<A,Boolean> pred, Function<A,A> fn, A a) {
     A current = a;
     while (true) {
       if (pred.apply(current)) return current;
@@ -671,7 +756,7 @@ public class P {
     }
   }
 
-  public static <A> Function<A,A> until(final Predicate<A> pred, final Function<A,A> fn) {
+  public static <A> Function<A,A> until(final Function<A,Boolean> pred, final Function<A,A> fn) {
     return new Function<A,A>() {
       @Override public A apply(A value) {
         return until(pred, fn, value);
@@ -679,7 +764,7 @@ public class P {
     };
   }
 
-  public static <A> Function<Function<A,A>,Function<A,A>> until(final Predicate<A> pred) {
+  public static <A> Function<Function<A,A>,Function<A,A>> until(final Function<A,Boolean> pred) {
     return new Function<Function<A,A>,Function<A,A>>() {
       @Override public Function<A,A> apply(Function<A,A> value) {
         return until(pred, value);
@@ -687,9 +772,9 @@ public class P {
     };
   }
 
-  public static <A> Function<Predicate<A>,Function<Function<A,A>,Function<A,A>>> until() {
-    return new Function<Predicate<A>,Function<Function<A,A>,Function<A,A>>>() {
-      @Override public Function<Function<A,A>,Function<A,A>> apply(Predicate<A> value) {
+  public static <A> Function<Function<A,Boolean>,Function<Function<A,A>,Function<A,A>>> until() {
+    return new Function<Function<A,Boolean>,Function<Function<A,A>,Function<A,A>>>() {
+      @Override public Function<Function<A,A>,Function<A,A>> apply(Function<A,Boolean> value) {
         return until(value);
       }
     };
@@ -727,14 +812,14 @@ public class P {
     };
   }
 
-  public static <A> Iterable<A> concat(Iterable<A> xs, Iterable<A> ys) {
+  public static <A> Iterable<A> append(Iterable<A> xs, Iterable<A> ys) {
     return Iterables.concat(xs, ys);
   }
 
   public static <A> Function<Iterable<A>,Iterable<A>> concat(final Iterable<A> xs) {
     return new Function<Iterable<A>,Iterable<A>>() {
       @Override public Iterable<A> apply(Iterable<A> value) {
-        return concat(xs, value);
+        return append(xs, value);
       }
     };
   }
@@ -747,11 +832,15 @@ public class P {
     };
   }
 
-  public static <A> Iterable<A> filter(Predicate<A> pred, Iterable<A> xs) {
-    return Iterables.filter(xs, pred);
+  public static <A> Iterable<A> filter(final Function<A,Boolean> pred, Iterable<A> xs) {
+    return Iterables.filter(xs, new Predicate<A>() {
+      @Override public boolean apply(A arg) {
+        return pred.apply(arg);
+      }
+    });
   }
 
-  public static <A> Function<Iterable<A>,Iterable<A>> filter(final Predicate<A> pred) {
+  public static <A> Function<Iterable<A>,Iterable<A>> filter(final Function<A,Boolean> pred) {
     return new Function<Iterable<A>,Iterable<A>>() {
       @Override public Iterable<A> apply(Iterable<A> value) {
         return filter(pred, value);
@@ -759,9 +848,9 @@ public class P {
     };
   }
 
-  public static <A> Function<Predicate<A>,Function<Iterable<A>,Iterable<A>>> filter() {
-    return new Function<Predicate<A>,Function<Iterable<A>,Iterable<A>>>() {
-      @Override public Function<Iterable<A>,Iterable<A>> apply(Predicate<A> value) {
+  public static <A> Function<Function<A,Boolean>,Function<Iterable<A>,Iterable<A>>> filter() {
+    return new Function<Function<A,Boolean>,Function<Iterable<A>,Iterable<A>>>() {
+      @Override public Function<Iterable<A>,Iterable<A>> apply(Function<A,Boolean> value) {
         return filter(value);
       }
     };
@@ -1224,7 +1313,7 @@ public class P {
   /**
    * Partially applied version of {@link P#orList(Iterable)}.
    */
-  public static <types> Function<Iterable<Boolean>,Boolean> orList() {
+  public static Function<Iterable<Boolean>,Boolean> orList() {
     return new Function<Iterable<Boolean>,Boolean>() {
       @Override public Boolean apply(Iterable<Boolean> value) {
         return orList(value);
@@ -1232,12 +1321,127 @@ public class P {
     };
   }
 
+  /**
+   * Applied to a predicate and a list, any determines if any element of the
+   * list satisfies the predicate.
+   *
+   * <p><b>Time Complexity:</b> O(length(xs))</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param predicate Predicate to apply to each element of the list.
+   * @param xs The list.
+   * @return True if any element of the list satisfies the predicate.
+   */
+  public static <A> Boolean any(Function<A,Boolean> predicate, Iterable<A> xs) {
+    return orList(map(predicate, xs));
+  }
 
+  /**
+   * Partially applied version of {@link P#any(Function, Iterable)}.
+   */
+  public static <A> Function<Iterable<A>,Boolean> any(final Function<A,Boolean> predicate) {
+    return new Function<Iterable<A>,Boolean>() {
+      @Override public Boolean apply(Iterable<A> value) {
+        return any(predicate, value);
+      }
+    };
+  }
 
+  /**
+   * Partially applied version of {@link P#any(Function, Iterable)}.
+   */
+  public static <A> Function<Function<A,Boolean>,Function<Iterable<A>,Boolean>> any() {
+    return new Function<Function<A,Boolean>,Function<Iterable<A>,Boolean>>() {
+      @Override public Function<Iterable<A>,Boolean> apply(Function<A,Boolean> value) {
+        return any(value);
+      }
+    };
+  }
 
+  /**
+   * Applied to a predicate and a list, all determines if all elements of the
+   * list satisfy the predicate.
+   *
+   * <p><b>Time Complexity:</b> O(length(xs))</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param predicate Predicate to apply to each element of the list.
+   * @param xs The list.
+   * @return True if every element of the list satisfies the predicate.
+   */
+  public static <A> Boolean all(Function<A,Boolean> predicate, Iterable<A> xs) {
+    return andList(map(predicate, xs));
+  }
 
+  /**
+   * Partially applied version of {@link P#all(Function, Iterable)}.
+   */
+  public static <A> Function<Iterable<A>,Boolean> all(final Function<A,Boolean> predicate) {
+    return new Function<Iterable<A>,Boolean>() {
+      @Override public Boolean apply(Iterable<A> value) {
+        return all(predicate, value);
+      }
+    };
+  }
 
+  /**
+   * Partially applied version of {@link P#all(Function, Iterable)}.
+   */
+  public static <A> Function<Function<A,Boolean>,Function<Iterable<A>,Boolean>> all() {
+    return new Function<Function<A,Boolean>,Function<Iterable<A>,Boolean>>() {
+      @Override public Function<Iterable<A>,Boolean> apply(Function<A,Boolean> value) {
+        return all(value);
+      }
+    };
+  }
 
+  /**
+   * The sum function computes the sum of a finite list of numbers.
+   *
+   * <p><b>Time Complexity:</b> O(length(xs))</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param xs The list to sum.
+   * @return The sum of the elements of xs.
+   */
+  public static Integer sum(Iterable<Integer> xs) {
+    return foldl(plus(), 0, xs);
+  }
+
+  /**
+   * Partially applied version of {@link P#sum(Iterable)}.
+   */
+  public static Function<Iterable<Integer>,Integer> sum() {
+    return new Function<Iterable<Integer>,Integer>() {
+      @Override public Integer apply(Iterable<Integer> value) {
+        return sum(value);
+      }
+    };
+  }
+
+  /**
+   * The product function computes the product of a finite list of numbers.
+   *
+   * <p><b>Time Complexity:</b> O(length(xs))</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param xs The list to multiply.
+   * @return The product of the elements of xs.
+   */
+  public static Integer product(Iterable<Integer> xs) {
+    return foldl(times(), 1, xs);
+  }
+
+  /**
+   * Partially applied version of {@link P#product(Iterable)}.
+   */
+  public static Function<Iterable<Integer>,Integer> product() {
+    return new Function<Iterable<Integer>,Integer>() {
+      @Override public Integer apply(Iterable<Integer> value) {
+        return product(value);
+      }
+    };
+  }
 
 
 
