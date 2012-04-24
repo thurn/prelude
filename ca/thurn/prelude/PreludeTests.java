@@ -8,6 +8,8 @@ import static org.junit.Assert.*;
 
 import org.junit.*;
 
+import com.google.common.base.Function;
+
 import java.util.*;
 
 /**
@@ -123,7 +125,7 @@ public class PreludeTests {
             $(1, 2, 3)));
     assertElementsEqual($(0, 1, 2, 3),
         foldl(
-            P.<Integer>concat(),
+            P.<Integer>append(),
             $(0),
             $($(1), $(2), $(3))));
     assertEquals(new Integer(0),
@@ -133,7 +135,7 @@ public class PreludeTests {
             $(1, 2, 3)));
     assertElementsEqual(s("123"),
         foldl(
-            P.<Character>concat(),
+            P.<Character>append(),
             s(""),
             $(s("1"), s("2"), s("3"))));
     assertEquals(new Integer(0),
@@ -150,7 +152,7 @@ public class PreludeTests {
             $(1, 2, 3)));
     assertElementsEqual($(1, 2, 3),
         foldl1(
-            P.<Integer>concat(),
+            P.<Integer>append(),
             $($(1), $(2), $(3))));
     assertEquals(new Integer(1),
         foldl1(
@@ -158,7 +160,7 @@ public class PreludeTests {
             $(1, 2, 3)));
     assertElementsEqual(s("123"),
         foldl1(
-            P.<Character>concat(),
+            P.<Character>append(),
             $(s("1"), s("2"), s("3"))));
   }
 
@@ -170,7 +172,7 @@ public class PreludeTests {
             $(5, 3, 2)));
     assertElementsEqual($(1, 2, 3, 0),
         foldr(
-            P.<Integer>concat(),
+            P.<Integer>append(),
             $(0),
             $($(1), $(2), $(3))));
     assertEquals(true,
@@ -194,7 +196,7 @@ public class PreludeTests {
             $(5, 3, 2, 10)));
     assertElementsEqual($(1, 2, 3, 0),
         foldr1(
-            P.<Integer>concat(),
+            P.<Integer>append(),
             $($(1), $(2), $(3), $(0))));
   }
 
@@ -234,6 +236,69 @@ public class PreludeTests {
     assertEquals(new Integer(24), product($(-1, 2, -3, 4)));
     assertEquals(new Integer(1), product(P.<Integer>$()));
   }
+
+  @Test public final void testConcat() {
+    assertElementsEqual(s("123"), concat($(s("1"), s("2"), s("3"))));
+    assertElementsEqual($(1, 2, 3), concat($($(1), $(2), $(3))));
+    assertElementsEqual($(), concat($($())));
+  }
+
+  @Test public final void testConcatMap() {
+    Function<String,Iterable<Character>> foldFn = new Function<String,Iterable<Character>>() {
+      @Override public Iterable<Character> apply(String str) {
+        return s(str + ",");
+      }
+    };
+    assertElementsEqual(s("foo,bar,baz,"), concatMap(foldFn, $("foo", "bar", "baz")));
+    assertElementsEqual(s(), concatMap(foldFn, P.<String>$()));
+  }
+
+  @Test public final void testMaximum() {
+    assertEquals(new Integer(10), maximum($(1, 3, 10, 2, 8)));
+    assertEquals(new Integer(1), maximum($(1)));
+    assertEquals(new Integer(1), maximum($(1, -3, -10, -2, -8)));
+  }
+
+  @Test(expected = NoSuchElementException.class)
+  public final void testMaximumFail() {
+    maximum(P.<Integer>$());
+  }
+
+  @Test public final void testMinimum() {
+    assertEquals(new Integer(1), minimum($(1, 3, 10, 2, 8)));
+    assertEquals(new Integer(1), minimum($(1)));
+    assertEquals(new Integer(-10), minimum($(1, -3, -10, -2, -8)));
+  }
+
+  @Test(expected = NoSuchElementException.class)
+  public final void testMinimumFail() {
+    minimum(P.<Integer>$());
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

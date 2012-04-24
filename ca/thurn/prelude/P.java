@@ -816,7 +816,7 @@ public class P {
     return Iterables.concat(xs, ys);
   }
 
-  public static <A> Function<Iterable<A>,Iterable<A>> concat(final Iterable<A> xs) {
+  public static <A> Function<Iterable<A>,Iterable<A>> append(final Iterable<A> xs) {
     return new Function<Iterable<A>,Iterable<A>>() {
       @Override public Iterable<A> apply(Iterable<A> value) {
         return append(xs, value);
@@ -824,10 +824,10 @@ public class P {
     };
   }
 
-  public static <A> Function<Iterable<A>,Function<Iterable<A>,Iterable<A>>> concat() {
+  public static <A> Function<Iterable<A>,Function<Iterable<A>,Iterable<A>>> append() {
     return new Function<Iterable<A>,Function<Iterable<A>,Iterable<A>>>() {
       @Override public Function<Iterable<A>,Iterable<A>> apply(Iterable<A> value) {
-        return concat(value);
+        return append(value);
       }
     };
   }
@@ -868,9 +868,9 @@ public class P {
     };
   }
 
-  private static <A> void checkNotEmpty(Iterable<A> xs) {
+  private static <A> void checkNotEmpty(Iterable<A> xs, String name) {
     if (isEmpty(xs)) {
-      throw new NoSuchElementException("Iterable was empty: " + xs);
+      throw new NoSuchElementException("Iterable argument to " + name + " cannot be empty!");
     }
   }
 
@@ -884,7 +884,7 @@ public class P {
    * @return First element.
    */
   public static <A> A head(Iterable<A> xs) {
-    checkNotEmpty(xs);
+    checkNotEmpty(xs, "head");
     return xs.iterator().next();
   }
 
@@ -909,7 +909,7 @@ public class P {
    * @return Last element.
    */
   public static <A> A last(Iterable<A> xs) {
-    checkNotEmpty(xs);
+    checkNotEmpty(xs, "last");
     return Iterables.getLast(xs);
   }
 
@@ -936,7 +936,7 @@ public class P {
    * @return Elements after the head.
    */
   public static <A> Iterable<A> tail(final Iterable<A> xs) {
-    checkNotEmpty(xs);
+    checkNotEmpty(xs, "tail");
     return new Iterable<A>() {
       @Override public Iterator<A> iterator() {
         Iterator<A> iterator = xs.iterator();
@@ -969,7 +969,7 @@ public class P {
    * @return Elements except the last.
    */
   public static <A> Iterable<A> init(final Iterable<A> xs) {
-    checkNotEmpty(xs);
+    checkNotEmpty(xs, "init");
     return new Iterable<A>() {
       @Override public Iterator<A> iterator() {
         return new SkipLastIterator<A>(xs.iterator());
@@ -1015,7 +1015,7 @@ public class P {
   }
 
   /**
-   * List index (subscript) operator, starting from 0.
+   * Iterable index (subscript) operator, starting from 0.
    *
    * <p><b>Time Complexity:</b>O(1)</p>
    * <p><b>Space Complexity:</b>O(1)</p>
@@ -1076,15 +1076,15 @@ public class P {
 
   /**
    * foldl, applied to a binary operator, a starting value (typically the
-   * left-identity of the operator), and a list, reduces the list using the
-   * binary operator, from left to right. The list must be finite.
+   * left-identity of the operator), and an iterable, reduces the iterable
+   * using the binary operator, from left to right. The list must be finite.
    *
    * <p><b>Time Complexity: O(length(xs))</b></p>
    * <p><b>Space Complexity: O(1)</b></p>
    *
    * @param fn The binary operator to apply between each element of xs.
    * @param a The initial value.
-   * @param xs The list.
+   * @param xs The iterable.
    * @return (...((a `fn` x1) `fn` x2) `fn`...) `f` xn - where `fn` is the
    *     infix invocation of the binary operator function.
    */
@@ -1134,18 +1134,18 @@ public class P {
   /**
    * foldl1 is a variant of {@link P#foldl(Function, Object, Iterable)} that
    * has no starting value argument, and thus must be applied to finite
-   * non-empty lists.
+   * non-empty iterables.
    *
    * <p><b>Time Complexity: O(length(xs))</b></p>
    * <p><b>Space Complexity: O(1)</b></p>
    *
    * @param fn The binary operator to apply between each element of xs.
-   * @param xs The list.
+   * @param xs The iterable.
    * @return (...((x1 `fn` x2) `fn` x3) `fn`...) `f` xn - where `fn` is the
    *     infix invocation of the binary operator function.
    */
   public static <A> A foldl1(Function<A,Function<A,A>> fn, Iterable<A> xs) {
-    checkNotEmpty(xs);
+    checkNotEmpty(xs, "foldl1");
     return foldl(fn, head(xs), tail(xs));
   }
 
@@ -1175,7 +1175,7 @@ public class P {
    * foldr, applied to a binary operator, a starting value (typically the
    * right-identity of the operator), and an Iterable, reduces the Iterable
    * using the binary operator, from right to left. This is a strict
-   * implementation, so it must be applied to a finite list.
+   * implementation, so it must be applied to a finite iterable.
    *
    * <p><b>Time Complexity:</b> O(length(xs))</p>
    * <p><b>Space Complexity:</b> O(length(xs))</p>
@@ -1183,7 +1183,7 @@ public class P {
    * @param fn The binary operator to apply between the elements of xs
    * @param b The initial value (conceptually placed after the last binary
    *     operator)
-   * @param xs The list.
+   * @param xs The iterable.
    * @return x1 `f` (x2 `f` ... (xn `f` a)...) - where `fn` is the infix
    *     invocation of the binary operator function.
    */
@@ -1232,18 +1232,18 @@ public class P {
 
   /**
    * foldr1 is a variant of foldr that has no starting value argument, and thus
-   * must be applied to finite non-empty lists.
+   * must be applied to finite non-empty iterables.
    *
    * <p><b>Time Complexity:</b> O(length(xs))</p>
    * <p><b>Space Complexity:</b> O(length(xs))</p>
    *
    * @param fn The binary operator to apply between the elements of xs
-   * @param xs The list.
+   * @param xs The iterable.
    * @return x1 `f` (x2 `f` ... (xn-1 `f` xn)...) - where `fn` is the infix
    *     invocation of the binary operator function.
    */
   public static <A> A foldr1(Function<A,Function<A,A>> fn, Iterable<A> xs) {
-    checkNotEmpty(xs);
+    checkNotEmpty(xs, "foldr1");
     return foldr(fn, last(xs), init(xs));
   }
 
@@ -1270,14 +1270,14 @@ public class P {
   }
 
   /**
-   * andList returns the conjunction of a Boolean list, which must be finite.
+   * andList returns the conjunction of a Boolean iterable, which must be finite.
    * This function is called 'and' in Haskell, but that name was used here for
    * the function Haskell calls (&&).
    *
    * <p><b>Time Complexity:</b> O(length(xs))</p>
    * <p><b>Space Complexity:</b> O(1)</p>
    *
-   * @param xs List of booleans.
+   * @param xs Iterable of booleans.
    * @return x1 && x2 && ... xn
    */
   public static Boolean andList(Iterable<Boolean> xs) {
@@ -1296,14 +1296,14 @@ public class P {
   }
 
   /**
-   * orList returns the disjunction of a Boolean list, which must be finite.
+   * orList returns the disjunction of a Boolean iterable, which must be finite.
    * This function is called 'or' in Haskell, but that name was used here for
    * the function Haskell calls (||).
    *
    * <p><b>Time Complexity:</b> O(length(xs))</p>
    * <p><b>Space Complexity:</b> O(1)</p>
    *
-   * @param xs List of booleans.
+   * @param xs Iterable of booleans.
    * @return x1 || x2 || ... xn
    */
   public static Boolean orList(Iterable<Boolean> xs) {
@@ -1322,15 +1322,15 @@ public class P {
   }
 
   /**
-   * Applied to a predicate and a list, any determines if any element of the
-   * list satisfies the predicate.
+   * Applied to a predicate and an iterable, any determines if any element of the
+   * iterable satisfies the predicate.
    *
    * <p><b>Time Complexity:</b> O(length(xs))</p>
    * <p><b>Space Complexity:</b> O(1)</p>
    *
-   * @param predicate Predicate to apply to each element of the list.
-   * @param xs The list.
-   * @return True if any element of the list satisfies the predicate.
+   * @param predicate Predicate to apply to each element of the iterable.
+   * @param xs The iterable.
+   * @return True if any element of the iterable satisfies the predicate.
    */
   public static <A> Boolean any(Function<A,Boolean> predicate, Iterable<A> xs) {
     return orList(map(predicate, xs));
@@ -1359,15 +1359,15 @@ public class P {
   }
 
   /**
-   * Applied to a predicate and a list, all determines if all elements of the
-   * list satisfy the predicate.
+   * Applied to a predicate and an iterable, all determines if all elements of the
+   * iterable satisfy the predicate.
    *
    * <p><b>Time Complexity:</b> O(length(xs))</p>
    * <p><b>Space Complexity:</b> O(1)</p>
    *
-   * @param predicate Predicate to apply to each element of the list.
-   * @param xs The list.
-   * @return True if every element of the list satisfies the predicate.
+   * @param predicate Predicate to apply to each element of the iterable.
+   * @param xs The iterable.
+   * @return True if every element of the iterable satisfies the predicate.
    */
   public static <A> Boolean all(Function<A,Boolean> predicate, Iterable<A> xs) {
     return andList(map(predicate, xs));
@@ -1396,12 +1396,12 @@ public class P {
   }
 
   /**
-   * The sum function computes the sum of a finite list of numbers.
+   * The sum function computes the sum of a finite iterable over integers.
    *
    * <p><b>Time Complexity:</b> O(length(xs))</p>
    * <p><b>Space Complexity:</b> O(1)</p>
    *
-   * @param xs The list to sum.
+   * @param xs The iterable to sum.
    * @return The sum of the elements of xs.
    */
   public static Integer sum(Iterable<Integer> xs) {
@@ -1420,12 +1420,13 @@ public class P {
   }
 
   /**
-   * The product function computes the product of a finite list of numbers.
+   * The product function computes the product of a finite iterable over
+   * integers.
    *
    * <p><b>Time Complexity:</b> O(length(xs))</p>
    * <p><b>Space Complexity:</b> O(1)</p>
    *
-   * @param xs The list to multiply.
+   * @param xs The iterable to multiply.
    * @return The product of the elements of xs.
    */
   public static Integer product(Iterable<Integer> xs) {
@@ -1442,6 +1443,213 @@ public class P {
       }
     };
   }
+
+  /**
+   * Concatenate an iterable of iterables.
+   *
+   * <p><b>Time Complexity:</b> O(1)</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param iterables The iterables to concatenate.
+   * @return An iterable which offers up the values from each input iterable
+   * in turn.
+   */
+  public static <A> Iterable<A> concat(Iterable<Iterable<A>> iterables) {
+    return Iterables.concat(iterables);
+  }
+
+  /**
+   * Partially applied version of {@link P#concat(Iterable)}.
+   */
+  public static <A> Function<Iterable<Iterable<A>>,Iterable<A>> concat() {
+    return new Function<Iterable<Iterable<A>>,Iterable<A>>() {
+      @Override public Iterable<A> apply(Iterable<Iterable<A>> value) {
+        return concat(value);
+      }
+    };
+  }
+
+  /**
+   * Map a function over an iterable and concatenate the results.
+   *
+   * <p><b>Time Complexity:</b> O(length(xs))</p>
+   * <p><b>Space Complexity:</b> O(length(xs))</p>
+   *
+   * @param fn Function to map over the iterable.
+   * @param xs The iterable.
+   * @return The concatenated application of fn to each element of xs.
+   */
+  public static <A,B> Iterable<B> concatMap(Function<A,Iterable<B>> fn, Iterable<A> xs) {
+    Function<A, Function<Iterable<B>, Iterable<B>>> foldFn =
+        P.<A,Iterable<B>,Function<Iterable<B>,Iterable<B>>>compose(P.<B>append(), fn);
+    return P.<A,Iterable<B>>foldr(foldFn, P.<B>$(), xs);
+  }
+
+  /**
+   * Partially applied version of {@link P#concatMap(Function, Iterable)}.
+   */
+  public static <A,B> Function<Iterable<A>,Iterable<B>> concatMap(
+      final Function<A,Iterable<B>> fn) {
+    return new Function<Iterable<A>,Iterable<B>>() {
+      @Override public Iterable<B> apply(Iterable<A> value) {
+        return concatMap(fn, value);
+      }
+    };
+  }
+
+  /**
+   * Partially applied version of {@link P#concatMap(Function, Iterable)}.
+   */
+  public static <A,B> Function<Function<A,Iterable<B>>,Function<Iterable<A>,Iterable<B>>>
+  concatMap() {
+    return new Function<Function<A,Iterable<B>>,Function<Iterable<A>,Iterable<B>>>() {
+      @Override public Function<Iterable<A>,Iterable<B>> apply(Function<A,Iterable<B>> value) {
+        return concatMap(value);
+      }
+    };
+  }
+
+  /**
+   * maximum returns the maximum value from an iterable, which must be non-empty,
+   * finite, and of an ordered type.
+   *
+   * <p><b>Time Complexity:</b> O(length(xs))</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param xs The iterable.
+   * @return The maximum value present in the iterable.
+   */
+  public static <A extends Comparable<A>> A maximum(Iterable<A> xs) {
+    checkNotEmpty(xs, "maximum");
+    return foldl1(P.<A>max(), xs);
+  }
+
+  /**
+   * Partially applied version of {@link P#maximum(Iterable)}.
+   */
+  public static <A extends Comparable<A>> Function<Iterable<A>,A> maximum() {
+    return new Function<Iterable<A>,A>() {
+      @Override public A apply(Iterable<A> value) {
+        return maximum(value);
+      }
+    };
+  }
+
+  /**
+   * minimum returns the minimum value from an iterable, which must be non-empty,
+   * finite, and of an ordered type.
+   *
+   * <p><b>Time Complexity:</b> O(length(xs))</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param xs The iterable.
+   * @return The minimum value present in the iterable.
+   */
+  public static <A extends Comparable<A>> A minimum(Iterable<A> xs) {
+    checkNotEmpty(xs, "minimum");
+    return foldl1(P.<A>min(), xs);
+  }
+
+  /**
+   * Partially applied version of {@link P#minimum(Iterable)}.
+   */
+  public static <A extends Comparable<A>> Function<Iterable<A>,A> minimum() {
+    return new Function<Iterable<A>,A>() {
+      @Override public A apply(Iterable<A> value) {
+        return minimum(value);
+      }
+    };
+  }
+
+  /**
+   * scanl is similar to foldl, but returns an iterable of successive reduced
+   * values from the left. Note that last(scanl(fn,a,xs)) is foldl(f,z,xs).
+   *
+   * <p><b>Time Complexity:</b> O(length(xs))</p>
+   * <p><b>Space Complexity:</b> O(length(xs))</p>
+   *
+   * @param fn Binary operator to reduce with, as in foldl.
+   * @param a Initial value for operation.
+   * @param xs Iterable to reduce over.
+   * @return [a, a `fn` x1, (a `fn` x1) `fn` x2, ...] where `fn` is the infix
+   *     invokation of the operator function fn.
+   */
+  public static <A,B> Iterable<A> scanl(Function<A,Function<B,A>> fn, A a, Iterable<B> xs) {
+    ImmutableList.Builder<A> result = ImmutableList.builder();
+    A current = a;
+    for (B x : xs) {
+      result.add(current);
+      current = fn.apply(current).apply(x);
+    }
+    return result.build();
+  }
+
+  /**
+   * Partially applied version of {@link P#scanl(Function, Object, Iterable)}.
+   */
+  public static <A,B> Function<Iterable<B>,Iterable<A>> scanl(final Function<A,Function<B,A>> fn,
+      final A a) {
+    return new Function<Iterable<B>,Iterable<A>>() {
+      @Override public Iterable<A> apply(Iterable<B> value) {
+        return scanl(fn, a, value);
+      }
+    };
+  }
+
+  /**
+   * Partially applied version of {@link P#scanl(Function, Object, Iterable)}.
+   */
+  public static <A,B> Function<A,Function<Iterable<B>,Iterable<A>>> scanl(
+      final Function<A,Function<B,A>> fn) {
+    return new Function<A,Function<Iterable<B>,Iterable<A>>>() {
+      @Override public Function<Iterable<B>,Iterable<A>> apply(A value) {
+        return scanl(fn, value);
+      }
+    };
+  }
+
+  /**
+   * Partially applied version of {@link P#scanl(Function, Object, Iterable)}.
+   */
+  public static <A,B>
+  Function<Function<A,Function<B,A>>,Function<A,Function<Iterable<B>,Iterable<A>>>> scanl() {
+    return new Function<Function<A,Function<B,A>>,Function<A,Function<Iterable<B>,Iterable<A>>>>() {
+      @Override public Function<A,Function<Iterable<B>,Iterable<A>>> apply(
+          Function<A,Function<B,A>> value) {
+        return scanl(value);
+      }
+    };
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
