@@ -1581,6 +1581,7 @@ public class P {
       result.add(current);
       current = fn.apply(current).apply(x);
     }
+    result.add(current);
     return result.build();
   }
 
@@ -1621,8 +1622,105 @@ public class P {
     };
   }
 
+  /**
+   * scanl1 is a variant of scanl that has no starting value argument.
+   *
+   * <p><b>Time Complexity:</b> O(length(xs))</p>
+   * <p><b>Space Complexity:</b> O(length(xs))</p>
+   *
+   * @param fn Binary operator to reduce with.
+   * @param xs Iterable to reduce over.
+   * @return [x1, x1 `fn` x2, (x1 `fn` x2) `fn` x3, ...] where `fn` is the infix
+   *     invokation of the operator function fn.
+   */
+  public static <A> Iterable<A> scanl1(Function<A,Function<A,A>> fn, Iterable<A> xs) {
+    checkNotEmpty(xs, "scanl1");
+    return scanl(fn, head(xs), tail(xs));
+  }
+
+  /**
+   * Partially applied version of {@link P#scanl1(Function, Iterable)}.
+   */
+  public static <A> Function<Iterable<A>,Iterable<A>> scanl1(final Function<A,Function<A,A>> fn) {
+    return new Function<Iterable<A>,Iterable<A>>() {
+      @Override public Iterable<A> apply(Iterable<A> value) {
+        return scanl1(fn, value);
+      }
+    };
+  }
+
+  /**
+   * Partially applied version of {@link P#scanl1(Function, Iterable)}.
+   */
+  public static <A> Function<Function<A,Function<A,A>>,Function<Iterable<A>,Iterable<A>>> scanl1() {
+    return new Function<Function<A,Function<A,A>>,Function<Iterable<A>,Iterable<A>>>() {
+      @Override public Function<Iterable<A>,Iterable<A>> apply(Function<A,Function<A,A>> value) {
+        return scanl1(value);
+      }
+    };
+  }
+
+  /**
+   * scanr is the right-to-left dual of scanl. Note that
+   * head(scanr(fn, b, xs)) is foldr(f, b, xs).
+   *
+   * <p><b>Time Complexity:</b> O(length(xs))</p>
+   * <p><b>Space Complexity:</b> O(length(xs))</p>
+   *
+   * @param fn Binary operator to reduce with.
+   * @param b Initial value for operation.
+   * @param xs Iterable to reduce over.
+   * @return [... xn-1 `fn` (xn `fn` b), xn `fn` b, b]
+   */
+  public static <A,B> Iterable<B> scanr(Function<A,Function<B,B>> fn, B b, Iterable<A> xs) {
+    ImmutableList.Builder<B> result = ImmutableList.builder();
+    B current = b;
+    for (A x : reverse(xs)) {
+      result.add(current);
+      current = fn.apply(x).apply(current);
+    }
+    result.add(current);
+    return reverse(result.build());
+  }
 
 
+
+  /**
+   * Partially applied version of {@link P#scanr(Function, Object, Iterable)}.
+   */
+  public static <A,B> Function<Iterable<A>,Iterable<B>> scanr(final Function<A,Function<B,B>> fn,
+      final B b) {
+    return new Function<Iterable<A>,Iterable<B>>() {
+      @Override public Iterable<B> apply(Iterable<A> value) {
+        return scanr(fn, b, value);
+      }
+    };
+  }
+
+  /**
+   * Partially applied version of {@link P#scanr(Function, Object, Iterable)}.
+   */
+  public static <A,B> Function<B,Function<Iterable<A>,Iterable<B>>> scanr(
+      final Function<A,Function<B,B>> fn) {
+    return new Function<B,Function<Iterable<A>,Iterable<B>>>() {
+      @Override public Function<Iterable<A>,Iterable<B>> apply(B value) {
+        return scanr(fn, value);
+      }
+    };
+  }
+
+  /**
+   * Partially applied version of {@link P#scanr(Function, Object, Iterable)}.
+   */
+  public static <A,B>
+  Function<Function<A,Function<B,B>>,Function<B,Function<Iterable<A>,Iterable<B>>>> scanr() {
+    return new Function<Function<A,Function<B,B>>,Function<B,Function<Iterable<A>,Iterable<B>>>>() {
+      @Override public Function<B,Function<Iterable<A>,Iterable<B>>> apply(
+          Function<A,Function<B,B>> value) {
+        return scanr(value);
+      }
+    };
+  }
 
 
 

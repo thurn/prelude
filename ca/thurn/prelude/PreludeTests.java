@@ -33,14 +33,21 @@ public class PreludeTests {
     three = $("1", "2", "3");
   }
 
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   private <A,B> void assertElementsEqual(Iterable<A> xs, Iterable<B> ys) {
     Iterator<A> xsIterator = xs.iterator();
     Iterator<B> ysIterator = ys.iterator();
     while (xsIterator.hasNext() && ysIterator.hasNext()) {
-      assertEquals(xsIterator.next(), ysIterator.next());
+      A nextA = xsIterator.next();
+      B nextB = ysIterator.next();
+      if (nextA instanceof Iterable && nextB instanceof Iterable) {
+        assertElementsEqual((Iterable)nextA, (Iterable)nextB);
+      } else {
+        assertEquals("Comparing " + xs + " to " + ys, nextA, nextB);
+      }
     }
-    if (xsIterator.hasNext()) fail("Iterable " + xs + " had too many elements");
-    if (ysIterator.hasNext()) fail("Iterable " + ys + " had too many elements");
+    if (xsIterator.hasNext()) fail("Iterable " + xs + " had more elements than " + ys);
+    if (ysIterator.hasNext()) fail("Iterable " + ys + " had more elements than " + xs);
    }
 
   @Test public final void testHead() {
@@ -164,6 +171,11 @@ public class PreludeTests {
             $(s("1"), s("2"), s("3"))));
   }
 
+  @Test(expected = NoSuchElementException.class)
+  public final void testFoldl1Fail() {
+    foldl1(plus(),P.<Integer>$());
+  }
+
   @Test public final void testFoldr() {
     assertEquals(new Integer(-6),
         foldr(
@@ -198,6 +210,12 @@ public class PreludeTests {
         foldr1(
             P.<Integer>append(),
             $($(1), $(2), $(3), $(0))));
+  }
+
+
+  @Test(expected = NoSuchElementException.class)
+  public final void testFoldr1Fail() {
+    foldr1(plus(),P.<Integer>$());
   }
 
   @Test public final void testAndList() {
@@ -275,6 +293,30 @@ public class PreludeTests {
     minimum(P.<Integer>$());
   }
 
+  @Test public final void testScanl() {
+    assertElementsEqual($(10, 5, 2, 0), scanl(minus(), 10, $(5, 3, 2)));
+    assertElementsEqual($($(10), $(10, 5), $(10, 5, 3), $(10, 5, 3, 2)),
+        scanl(P.<Integer>append(), $(10), $($(5), $(3), $(2))));
+    assertElementsEqual($(0), scanl(minus(), 0, P.<Integer>$()));
+  }
+
+  @Test public final void testScanl1() {
+    assertElementsEqual($(5, 2, 0), scanl1(minus(), $(5, 3, 2)));
+    assertElementsEqual($($(5), $(5, 3), $(5, 3, 2)),
+        scanl1(P.<Integer>append(), $($(5), $(3), $(2))));
+  }
+
+  @Test(expected = NoSuchElementException.class)
+  public final void testScanl1Fail() {
+    scanl1(minus(), P.<Integer>$());
+  }
+
+  @Test public final void testScanr() {
+    assertElementsEqual($(-6, 11, -8, 10), scanr(minus(), 10, $(5, 3, 2)));
+    assertElementsEqual($($(5, 3, 2, 10), $(3, 2, 10), $(2, 10), $(10)),
+        scanr(P.<Integer>append(), $(10), $($(5), $(3), $(2))));
+    assertElementsEqual($(0), scanr(minus(), 0, P.<Integer>$()));
+  }
 
 
 
