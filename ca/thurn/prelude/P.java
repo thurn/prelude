@@ -1670,7 +1670,8 @@ public class P {
    * @param fn Binary operator to reduce with.
    * @param b Initial value for operation.
    * @param xs Iterable to reduce over.
-   * @return [... xn-1 `fn` (xn `fn` b), xn `fn` b, b]
+   * @return [... xn-1 `fn` (xn `fn` b), xn `fn` b, b] where `fn` is the infix
+   *     invokation of the operation function fn.
    */
   public static <A,B> Iterable<B> scanr(Function<A,Function<B,B>> fn, B b, Iterable<A> xs) {
     ImmutableList.Builder<B> result = ImmutableList.builder();
@@ -1722,10 +1723,153 @@ public class P {
     };
   }
 
+  /**
+   * scanr1 is a variant of scanr that has no starting value argument.
+   *
+   * <p><b>Time Complexity:</b> O(length(xs))</p>
+   * <p><b>Space Complexity:</b> O(length(xs))</p>
+   *
+   * @param fn Binary operator function to reduce with.
+   * @param xs Iterable to reduce over.
+   * @return [... xn-2 `fn` (xn-1 `fn` xn), xn-1 `fn` xn, xn] where `fn` is the infix
+   *     invokation of the operation function fn.
+   */
+  public static <A> Iterable<A> scanr1(Function<A,Function<A,A>> fn, Iterable<A> xs) {
+    checkNotEmpty(xs, "scanr1");
+    return scanr(fn, last(xs), init(xs));
+  }
 
+  /**
+   * Partially applied version of {@link P#scanr1(Function, Iterable)}.
+   */
+  public static <A> Function<Iterable<A>,Iterable<A>> scanr1(final Function<A,Function<A,A>> fn) {
+    return new Function<Iterable<A>,Iterable<A>>() {
+      @Override public Iterable<A> apply(Iterable<A> value) {
+        return scanr1(fn, value);
+      }
+    };
+  }
 
+  /**
+   * Partially applied version of {@link P#scanr1(Function, Iterable)}.
+   */
+  public static <A> Function<Function<A,Function<A,A>>,Function<Iterable<A>,Iterable<A>>> scanr1() {
+    return new Function<Function<A,Function<A,A>>,Function<Iterable<A>,Iterable<A>>>() {
+      @Override public Function<Iterable<A>,Iterable<A>> apply(Function<A,Function<A,A>> value) {
+        return scanr1(value);
+      }
+    };
+  }
 
+  /**
+   * iterate(fn, a) returns an infinite iterable of repeated applications of
+   * fn to a.
+   *
+   * <p><b>Time Complexity:</b> O(1)</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param fn Function to repeatedly apply.
+   * @param a Initial value.
+   * @return [a, fn(a), fn(fn(a)), ...]
+   */
+  public static <A> Iterable<A> iterate(final Function<A,A> fn, final A a) {
+    return new Iterable<A>() {
+      @Override public Iterator<A> iterator() {
+        return new IterateFunctionIterator<A>(fn, a);
+      }
+    };
+  }
 
+  /**
+   * Partially applied version of {@link P#iterate(Function, Object)}.
+   */
+  public static <A> Function<A,Iterable<A>> iterate(final Function<A,A> fn) {
+    return new Function<A,Iterable<A>>() {
+      @Override public Iterable<A> apply(A value) {
+        return iterate(fn, value);
+      }
+    };
+  }
+
+  /**
+   * Partially applied version of {@link P#iterate(Function, Object)}.
+   */
+  public static <A> Function<Function<A,A>,Function<A,Iterable<A>>> iterate() {
+    return new Function<Function<A,A>,Function<A,Iterable<A>>>() {
+      @Override public Function<A,Iterable<A>> apply(Function<A,A> value) {
+        return iterate(value);
+      }
+    };
+  }
+
+  /**
+   * repeat(a) is an infinite iterable, with a the value of every element.
+   *
+   * <p><b>Time Complexity:</b> O(1)</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param a Value to repeat.
+   * @return [a, a, a, ...]
+   */
+  public static <A> Iterable<A> repeat(final A a) {
+    return Iterables.cycle($(a));
+  }
+
+  /**
+   * Partially applied version of {@link P#repeat(Object)}.
+   */
+public static <A> Function<A,Iterable<A>> repeat() {
+  return new Function<A,Iterable<A>>() {
+    @Override public Iterable<A> apply(A value) {
+      return repeat(value);
+    }
+  };
+}
+
+  /**
+   * take n, applied to an iterable xs, returns the prefix of xs of length n, or xs
+   * itself if n > length xs. Examples:
+   * <code>
+   * take(5, s("Hello World!")) is s("Hello")
+   * take(3, $(1,2,3,4,5)) is $(1,2,3)
+   * take(3, $(1,2)) is $(1,2)
+   * take(3, $()) is $()
+   * take(-1, $(1,2)) is $()
+   * take(0, $(1,2)) == $()
+   * </code>
+   * <p><b>Time Complexity:</b> O(1)</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param n Prefix length.
+   * @param xs The iterable.
+   * @return The first n elements of xs, if possible.
+   */
+  public static <A> Iterable<A> take(Integer n, Iterable<A> xs) {
+    if (n < 0) n = 0;
+    return Iterables.limit(xs, n);
+  }
+
+  /**
+   * Partially applied version of {@link P#take(Integer, Iterable)}.
+   */
+  public static <A> Function<Iterable<A>,Iterable<A>> take(final Integer n) {
+    return new Function<Iterable<A>,Iterable<A>>() {
+      @Override public Iterable<A> apply(Iterable<A> value) {
+        return take(n, value);
+      }
+    };
+  }
+
+  /**
+   * Partially applied version of {@link P#take(Integer, Iterable)}.
+   */
+  public static <A> Function<Integer,Function<Iterable<A>,Iterable<A>>> take() {
+    return new Function<Integer,Function<Iterable<A>,Iterable<A>>>() {
+      @Override public Function<Iterable<A>,Iterable<A>> apply(Integer value) {
+        return take(value);
+      }
+    };
+  }
 
 
 

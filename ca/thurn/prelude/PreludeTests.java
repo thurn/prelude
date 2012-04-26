@@ -318,8 +318,41 @@ public class PreludeTests {
     assertElementsEqual($(0), scanr(minus(), 0, P.<Integer>$()));
   }
 
+  @Test public final void testScanr1() {
+    assertElementsEqual($(4, 1, 2), scanr1(minus(), $(5, 3, 2)));
+    assertElementsEqual($($(5, 3, 2), $(3, 2), $(2)),
+        scanr1(P.<Integer>append(), $($(5), $(3), $(2))));
+  }
 
+  @Test(expected = NoSuchElementException.class)
+  public final void testScanr1Fail() {
+    scanr1(minus(), P.<Integer>$());
+  }
 
+  @Test public final void testIterate() {
+    Function<Integer, Integer> triple = new Function<Integer, Integer>() {
+      @Override public Integer apply(Integer value) {
+        return value * 3;
+      }
+    };
+    assertElementsEqual($(1, 3, 9), take(3, iterate(triple, 1)));
+    assertEquals(new Integer(10), head(iterate(triple, 10)));
+    assertEquals(new Integer(30), head(tail(iterate(triple, 10))));
+  }
+
+  @Test public final void testRepeat() {
+    assertElementsEqual($(1, 1, 1, 1, 1), take(5, repeat(1)));
+    assertEquals(new Integer(1), head(repeat(1)));
+    assertEquals(new Integer(1), head(tail(repeat(1))));
+  }
+
+  @Test public final void testTake() {
+    assertElementsEqual(s("Hello"), take(5, s("Hello World!")));
+    assertElementsEqual($(1, 2, 3), take(3, $(1, 2, 3, 4, 5)));
+    assertElementsEqual($(1, 2), take(3, $(1, 2)));
+    assertElementsEqual($(), take(-1, $(1, 2)));
+    assertElementsEqual($(), take(0, $(1, 2)));
+  }
 
 
 
