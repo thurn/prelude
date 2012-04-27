@@ -50,6 +50,20 @@ public class PreludeTests {
     if (ysIterator.hasNext()) fail("Iterable " + ys + " had more elements than " + xs);
    }
 
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  private <A,B> void assertPairEquals(Pair<A,B> pair1, Pair<A,B> pair2) {
+    if (pair1.first instanceof Iterable && pair2.first instanceof Iterable) {
+      assertElementsEqual((Iterable)pair1.first, (Iterable)pair2.first);
+    } else {
+      assertEquals(pair1.first, pair2.first);
+    }
+    if (pair1.second instanceof Iterable && pair2.second instanceof Iterable) {
+      assertElementsEqual((Iterable)pair1.second, (Iterable)pair2.second);
+    } else {
+      assertEquals(pair1.second, pair2.second);
+    }
+  }
+
   @Test public final void testHead() {
     assertEquals("1", head(one));
     assertEquals("1", head(two));
@@ -346,6 +360,20 @@ public class PreludeTests {
     assertEquals(new Integer(1), head(tail(repeat(1))));
   }
 
+  @Test public final void testReplicate() {
+    assertElementsEqual(s("aaaaa"), replicate(5, 'a'));
+    assertElementsEqual($(3, 3, 3), replicate(3, 3));
+    assertElementsEqual($(1), replicate(1, 1));
+    assertElementsEqual($(), replicate(-1, 12));
+    assertElementsEqual($(), replicate(0, 12));
+  }
+
+  @Test public final void testCycle() {
+    assertElementsEqual(s("ababab"), take(6, cycle(s("ab"))));
+    assertElementsEqual($(3, 3, 3), take(3, cycle($(3))));
+    assertEquals(new Integer(1), head(cycle($(1, 2, 3))));
+  }
+
   @Test public final void testTake() {
     assertElementsEqual(s("Hello"), take(5, s("Hello World!")));
     assertElementsEqual($(1, 2, 3), take(3, $(1, 2, 3, 4, 5)));
@@ -353,6 +381,26 @@ public class PreludeTests {
     assertElementsEqual($(), take(-1, $(1, 2)));
     assertElementsEqual($(), take(0, $(1, 2)));
   }
+
+  @Test public final void testDrop() {
+    assertElementsEqual(s("World!"), drop(6, s("Hello World!")));
+    assertElementsEqual($(4,5), drop(3, $(1,2,3,4,5)));
+    assertElementsEqual($(), drop(3, $(1,2)));
+    assertElementsEqual($(), drop(3, $()));
+    assertElementsEqual($(1,2), drop(-1, $(1,2)));
+    assertElementsEqual($(1,2), drop(0, $(1,2)));
+  }
+
+  @Test public final void testSplitAt() {
+   assertPairEquals(splitAt(6, s("Hello World!")), t(s("Hello "), s("World!")));
+   assertPairEquals(splitAt(3, $(1,2,3,4,5)), t($(1,2,3),$(4,5)));
+   assertPairEquals(splitAt(1, $(1,2,3)), t($(1),$(2,3)));
+   assertPairEquals(splitAt(3, $(1,2,3)), t($(1,2,3),P.<Integer>$()));
+   assertPairEquals(splitAt(4, $(1,2,3)), t($(1,2,3),P.<Integer>$()));
+   assertPairEquals(splitAt(0, $(1,2,3)), t(P.<Integer>$(),$(1,2,3)));
+   assertPairEquals(splitAt(-1, $(1,2,3)), t(P.<Integer>$(),$(1,2,3)));
+  }
+
 
 
 

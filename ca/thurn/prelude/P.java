@@ -417,8 +417,33 @@ public class P {
     final A first;
     final B second;
     private Pair(A first, B second) {
+      Preconditions.checkNotNull(first);
+      Preconditions.checkNotNull(second);
       this.first = first;
       this.second = second;
+    }
+
+    @Override public int hashCode() {
+      final int prime = 31;
+      int result = 1;
+      result = prime * result + first.hashCode();
+      result = prime * result + second.hashCode();
+      return result;
+    }
+
+    @Override public boolean equals(Object obj) {
+      if (this == obj) return true;
+      if (obj == null) return false;
+      if (!(obj instanceof Pair)) return false;
+      @SuppressWarnings("rawtypes")
+      Pair other = (Pair) obj;
+      if (!first.equals(other.first)) return false;
+      if (!second.equals(other.second)) return false;
+      return true;
+    }
+
+    @Override public String toString() {
+      return "t(" + first + ", " + second + ")";
     }
   }
 
@@ -1803,40 +1828,104 @@ public class P {
   }
 
   /**
-   * repeat(a) is an infinite iterable, with a the value of every element.
+   * repeat(x) is an infinite iterable, with x the value of every element.
    *
    * <p><b>Time Complexity:</b> O(1)</p>
    * <p><b>Space Complexity:</b> O(1)</p>
    *
-   * @param a Value to repeat.
-   * @return [a, a, a, ...]
+   * @param x Value to repeat.
+   * @return [x, x, x, ...]
    */
-  public static <A> Iterable<A> repeat(final A a) {
-    return Iterables.cycle($(a));
+  public static <A> Iterable<A> repeat(final A x) {
+    return Iterables.cycle($(x));
   }
 
   /**
    * Partially applied version of {@link P#repeat(Object)}.
    */
-public static <A> Function<A,Iterable<A>> repeat() {
-  return new Function<A,Iterable<A>>() {
-    @Override public Iterable<A> apply(A value) {
-      return repeat(value);
-    }
-  };
-}
+  public static <A> Function<A,Iterable<A>> repeat() {
+    return new Function<A,Iterable<A>>() {
+      @Override public Iterable<A> apply(A value) {
+        return repeat(value);
+      }
+    };
+  }
+
+  /**
+   * replicate(n, x) is a list of length n with x the value of every element or
+   * an empty list if n <= 0.
+   *
+   * <p><b>Time Complexity:</b> O(1)</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param n Desired length of the list.
+   * @param x Repeated list value.
+   * @return E.g. [x, x, x] for replicate(3, x)
+   */
+  public static <A> Iterable<A> replicate(Integer n, A x) {
+    return take(n, repeat(x));
+  }
+
+  /**
+   * Partially applied version of {@link P#replicate(Integer, Object)}.
+   */
+  public static <A> Function<A,Iterable<A>> replicate(final Integer n) {
+    return new Function<A,Iterable<A>>() {
+      @Override public Iterable<A> apply(A value) {
+        return replicate(n, value);
+      }
+    };
+  }
+
+  /**
+   * Partially applied version of {@link P#replicate(Integer, Object)}.
+   */
+  public static <A> Function<Integer,Function<A,Iterable<A>>> replicate() {
+    return new Function<Integer,Function<A,Iterable<A>>>() {
+      @Override public Function<A,Iterable<A>> apply(Integer value) {
+        return replicate(value);
+      }
+    };
+  }
+
+  /**
+   * cycle() ties a finite list into a circular one, or equivalently, the
+   * infinite repetition of the original list. It is the identity on infinite
+   * lists.
+   *
+   * <p><b>Time Complexity:</b> O(1)</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param xs The list to repeat
+   * @return E.g. [1, 2, 1, 2, ...] for cycle([1, 2])
+   */
+  public static <A> Iterable<A> cycle(Iterable<A> xs) {
+    return Iterables.cycle(xs);
+  }
+
+  /**
+   * Partially applied version of {@link P#cycle(Iterable)}.
+   */
+  public static <A> Function<Iterable<A>,Iterable<A>> cycle() {
+    return new Function<Iterable<A>,Iterable<A>>() {
+      @Override public Iterable<A> apply(Iterable<A> value) {
+        return cycle(value);
+      }
+    };
+  }
 
   /**
    * take n, applied to an iterable xs, returns the prefix of xs of length n, or xs
-   * itself if n > length xs. Examples:
-   * <code>
-   * take(5, s("Hello World!")) is s("Hello")
-   * take(3, $(1,2,3,4,5)) is $(1,2,3)
-   * take(3, $(1,2)) is $(1,2)
-   * take(3, $()) is $()
-   * take(-1, $(1,2)) is $()
-   * take(0, $(1,2)) == $()
-   * </code>
+   * itself if n > length xs.
+   *
+   * <p><b>Examples:</b></p><pre>
+   * take(5, s("Hello World!")) gives s("Hello")
+   * take(3, $(1,2,3,4,5)) gives $(1,2,3)
+   * take(3, $(1,2)) gives $(1,2)
+   * take(3, $()) gives $()
+   * take(-1, $(1,2)) gives $()
+   * take(0, $(1,2)) gives $()
+   * </pre>
    * <p><b>Time Complexity:</b> O(1)</p>
    * <p><b>Space Complexity:</b> O(1)</p>
    *
@@ -1871,6 +1960,101 @@ public static <A> Function<A,Iterable<A>> repeat() {
     };
   }
 
+  /**
+   * drop n xs returns the suffix of xs after the first n elements, or $() if
+   * n > length xs.
+   *
+   * <p><b>Examples:</b></p>
+   * <pre>
+   * drop(6, s("Hello World!")) gives s("World!")
+   * drop(3, $(1,2,3,4,5)) gives $(4,5)
+   * drop(3, $(1,2)) gives $()
+   * drop(3, $()) gives $()
+   * drop(-1, $(1,2)) gives $(1,2)
+   * drop(0, $(1,2)) gives $(1,2)
+   * </pre>
+   *
+   * <p><b>Time Complexity:</b> O(1)</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param n Length of prefix to drop.
+   * @param xs The iterable to drop from.
+   * @return xs with the first n elements removed, if possible.
+   */
+  public static <A> Iterable<A> drop(Integer n, Iterable<A> xs) {
+    if (n < 0) n = 0;
+    return Iterables.skip(xs, n);
+  }
+
+  /**
+   * Partially applied version of {@link P#drop(Integer, Iterable)}.
+   */
+  public static <A> Function<Iterable<A>,Iterable<A>> drop(final Integer n) {
+    return new Function<Iterable<A>,Iterable<A>>() {
+      @Override public Iterable<A> apply(Iterable<A> value) {
+        return drop(n, value);
+      }
+    };
+  }
+
+  /**
+   * Partially applied version of {@link P#drop(Integer, Iterable)}.
+   */
+  public static <A> Function<Integer,Function<Iterable<A>,Iterable<A>>> drop() {
+    return new Function<Integer,Function<Iterable<A>,Iterable<A>>>() {
+      @Override public Function<Iterable<A>,Iterable<A>> apply(Integer value) {
+        return drop(value);
+      }
+    };
+  }
+
+  /**
+   * splitAt n xs returns a pair where first element is xs prefix of length n
+   * and second element is the remainder of the list. It is equivalent to
+   * t(take(n, xs), drop(n, xs)).
+   *
+   * <p><b>Examples:</b></p><pre>
+   * splitAt(6, s("Hello World!")) gives t(s("Hello "), s("World!"))
+   * splitAt(3, $(1,2,3,4,5)) gives t($(1,2,3),$(4,5))
+   * splitAt(1, $(1,2,3)) gives t($(1),$(2,3))
+   * splitAt(3, $(1,2,3)) gives t($(1,2,3),$())
+   * splitAt(4, $(1,2,3)) gives t($(1,2,3),$())
+   * splitAt(0, $(1,2,3)) gives t($(),$(1,2,3))
+   * splitAt(-1, $(1,2,3)) gives t($(),$(1,2,3))
+   * </pre>
+   * <p><b>Time Complexity:</b> O(1)</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param n Position to split at.
+   * @param xs Iterable to split.
+   * @return Split result in a pair.
+   */
+  public static <A> Pair<Iterable<A>,Iterable<A>> splitAt(Integer n, Iterable<A> xs) {
+    return t(take(n, xs), drop(n, xs));
+  }
+
+  /**
+   * Partially applied version of {@link P#splitAt(Integer, Iterable)}.
+   */
+  public static <A> Function<Iterable<A>,Pair<Iterable<A>,Iterable<A>>> splitAt(final Integer n) {
+    return new Function<Iterable<A>,Pair<Iterable<A>,Iterable<A>>>() {
+      @Override public Pair<Iterable<A>,Iterable<A>> apply(Iterable<A> value) {
+        return splitAt(n, value);
+      }
+    };
+  }
+
+  /**
+   * Partially applied version of {@link P#splitAt(Integer, Iterable)}.
+   */
+  public static <A> Function<Integer,Function<Iterable<A>,Pair<Iterable<A>,Iterable<A>>>>
+      splitAt() {
+    return new Function<Integer,Function<Iterable<A>,Pair<Iterable<A>,Iterable<A>>>>() {
+      @Override public Function<Iterable<A>,Pair<Iterable<A>,Iterable<A>>> apply(Integer value) {
+        return splitAt(value);
+      }
+    };
+  }
 
 
 
