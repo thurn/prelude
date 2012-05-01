@@ -243,25 +243,25 @@ public class P {
   }
 
   /**
-   * Checks if x is less than y.
+   * Checks if integer x is less than integer y.
    *
    * <p><b>Time Complexity:</b> O(1)</p>
    * <p><b>Space Complexity:</b> O(1)</p>
    *
-   * @param x First comparable value.
-   * @param y Second comparable value.
+   * @param x First integer.
+   * @param y Second integer.
    * @return True if x is less than y.
    */
-  public static <A extends Comparable<A>> Boolean lt(A x, A y) {
-    return x.compareTo(y) < 0;
+  public static Boolean lt(Integer x, Integer y) {
+    return x < y;
   }
 
   /**
    * Partially applied version of {@link P#lt(Comparable, Comparable)}.
    */
-  public static <A extends Comparable<A>> Function<A,Boolean> lt(final A x) {
-    return new Function<A,Boolean>() {
-      @Override public Boolean apply(A value) {
+  public static Function<Integer,Boolean> lt(final Integer x) {
+    return new Function<Integer,Boolean>() {
+      @Override public Boolean apply(Integer value) {
         return lt(x, value);
       }
     };
@@ -270,13 +270,14 @@ public class P {
   /**
    * Partially applied version of {@link P#lt(Comparable, Comparable)}.
    */
-  public static <A extends Comparable<A>> Function<A,Function<A,Boolean>> lt() {
-    return new Function<A,Function<A,Boolean>>() {
-      @Override public Function<A,Boolean> apply(A value) {
+  public static Function<Integer,Function<Integer,Boolean>> lt() {
+    return new Function<Integer,Function<Integer,Boolean>>() {
+      @Override public Function<Integer,Boolean> apply(Integer value) {
         return lt(value);
       }
     };
   }
+
 
   /**
    * The boolean conjunction of two boolean values.
@@ -2048,10 +2049,56 @@ public class P {
    * Partially applied version of {@link P#splitAt(Integer, Iterable)}.
    */
   public static <A> Function<Integer,Function<Iterable<A>,Pair<Iterable<A>,Iterable<A>>>>
-      splitAt() {
+  splitAt() {
     return new Function<Integer,Function<Iterable<A>,Pair<Iterable<A>,Iterable<A>>>>() {
       @Override public Function<Iterable<A>,Pair<Iterable<A>,Iterable<A>>> apply(Integer value) {
         return splitAt(value);
+      }
+    };
+  }
+
+  /**
+   * takeWhile, applied to a predicate p and an iterable xs, returns the
+   * longest prefix (possibly empty) of xs of elements that satisfy p.
+   *
+   * <p><b>Examples:</b></p><pre>
+   * takeWhile(_(lt(), 3), $(1,2,3,4,1,2,3,4)) gives $(1,2)
+   * takeWhile(_(lt(), 9), $(1,2,3)) gives $(1,2,3)
+   * takeWhile(_(lt(), 0), $(1,2,3)) gives $()
+   * </pre>
+   * <p><b>Time Complexity:</b> O(1)</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param p Predicate to apply to each element.
+   * @param xs Iterable to take the prefix of.
+   * @return The longest prefix of xs where every element satisfies p.
+   */
+  public static <A> Iterable<A> takeWhile(final Function<A,Boolean> p, final Iterable<A> xs) {
+    return new Iterable<A>() {
+      @Override public Iterator<A> iterator() {
+        return new TakeWhileIterator<A>(p, xs.iterator());
+      }
+    };
+  }
+
+  /**
+   * Partially applied version of {@link P#takeWhile(Function, Iterable)}.
+   */
+  public static <A> Function<Iterable<A>,Iterable<A>> takeWhile(final Function<A,Boolean> p) {
+    return new Function<Iterable<A>,Iterable<A>>() {
+      @Override public Iterable<A> apply(Iterable<A> value) {
+        return takeWhile(p, value);
+      }
+    };
+  }
+
+  /**
+   * Partially applied version of {@link P#takeWhile(Function, Iterable)}.
+   */
+  public static <A> Function<Function<A,Boolean>,Function<Iterable<A>,Iterable<A>>> takeWhile() {
+    return new Function<Function<A,Boolean>,Function<Iterable<A>,Iterable<A>>>() {
+      @Override public Function<Iterable<A>,Iterable<A>> apply(Function<A,Boolean> value) {
+        return takeWhile(value);
       }
     };
   }

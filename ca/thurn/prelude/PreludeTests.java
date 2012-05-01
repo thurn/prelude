@@ -401,6 +401,12 @@ public class PreludeTests {
    assertPairEquals(splitAt(-1, $(1,2,3)), t(P.<Integer>$(),$(1,2,3)));
   }
 
+  @Test public final void testTakeWhile() {
+    assertElementsEqual($(1,2), takeWhile(_(lt(), 3), $(1,2,3,4,1,2,3,4)));
+    assertElementsEqual($(1,2,3), takeWhile(_(lt(), 9), $(1,2,3)));
+    assertElementsEqual($(), takeWhile(_(lt(), 0), $(1,2,3)));
+  }
+
 
 
 
