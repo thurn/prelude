@@ -1538,7 +1538,11 @@ public class P {
   /**
    * maximum returns the maximum value from an iterable, which must be non-empty,
    * finite, and of an ordered type.
-   *
+   * <p><b>Examples:</b></p><pre>
+   * maximum($(1, 3, 10, 2, 8)) gives 10
+   * maximum($(1)) gives 1
+   * maximum($(1, -3, -10, -2, -8)) gives 1
+   * </pre>
    * <p><b>Time Complexity:</b> O(length(xs))</p>
    * <p><b>Space Complexity:</b> O(1)</p>
    *
@@ -1564,7 +1568,11 @@ public class P {
   /**
    * minimum returns the minimum value from an iterable, which must be non-empty,
    * finite, and of an ordered type.
-   *
+   * <p><b>Examples:</b></p><pre>
+   * minimum($(1, 3, 10, 2, 8)) gives 1
+   * minimum($(1)) gives 1
+   * minimum($(1, -3, -10, -2, -8)) gives -10
+   * </pre>
    * <p><b>Time Complexity:</b> O(length(xs))</p>
    * <p><b>Space Complexity:</b> O(1)</p>
    *
@@ -1588,10 +1596,15 @@ public class P {
   }
 
   /**
-   * scanl is similar to foldl, but returns an iterable of successive reduced
-   * values from the left. Note that last(scanl(fn,a,xs)) is foldl(f,z,xs).
-   *
-   * <p><b>Time Complexity:</b> O(length(xs))</p>
+   * scanl is similar to {@link P#foldl(Function, Object, Iterable)}, but
+   * returns an iterable of successive reduced values from the left. Note that
+   * last(scanl(fn,a,xs)) is foldl(f,z,xs).
+   * <p><b>Examples:</b></p><pre>
+   * scanl(minus(), 10, $(5, 3, 2)) gives $(10, 5, 2, 0)
+   * scanl(P.<Integer>append(), $(10), $($(5), $(3), $(2))) gives
+   *     $($(10), $(10, 5), $(10, 5, 3), $(10, 5, 3, 2))
+   * scanl(minus(), 0, P.<Integer>$()) gives $(0)
+   * </pre>
    * <p><b>Space Complexity:</b> O(length(xs))</p>
    *
    * @param fn Binary operator to reduce with, as in foldl.
@@ -1649,8 +1662,13 @@ public class P {
   }
 
   /**
-   * scanl1 is a variant of scanl that has no starting value argument.
-   *
+   * scanl1 is a variant of {@link P#scanl(Function, Object, Iterable)} that
+   * has no starting value argument.
+   * <p><b>Examples:</b></p><pre>
+   * scanl1(minus(), $(5, 3, 2)) gives $(5, 2, 0)
+   * scanl1(P.<Integer>append(), $($(5), $(3), $(2))) gives
+   *     $($(5), $(5, 3), $(5, 3, 2))
+   * </pre>
    * <p><b>Time Complexity:</b> O(length(xs))</p>
    * <p><b>Space Complexity:</b> O(length(xs))</p>
    *
@@ -1687,9 +1705,15 @@ public class P {
   }
 
   /**
-   * scanr is the right-to-left dual of scanl. Note that
+   * scanr is the right-to-left dual of
+   * {@link P#scanl(Function, Object, Iterable)}. Note that
    * head(scanr(fn, b, xs)) is foldr(f, b, xs).
-   *
+   * <p><b>Examples:</b></p><pre>
+   * scanr(minus(), 10, $(5, 3, 2)) gives $(-6, 11, -8, 10)
+   * scanr(P.<Integer>append(), $(10), $($(5), $(3), $(2))) gives
+   *     $($(5, 3, 2, 10), $(3, 2, 10), $(2, 10), $(10))
+   * scanr(minus(), 0, P.<Integer>$()) gives $()
+   * </pre>
    * <p><b>Time Complexity:</b> O(length(xs))</p>
    * <p><b>Space Complexity:</b> O(length(xs))</p>
    *
@@ -1750,8 +1774,13 @@ public class P {
   }
 
   /**
-   * scanr1 is a variant of scanr that has no starting value argument.
-   *
+   * scanr1 is a variant of {@link P#scanr(Function, Object, Iterable)} that
+   * has no starting value argument.
+   * <p><b>Examples:</b></p><pre>
+   * scanr1(minus(), $(5, 3, 2)) gives $(4, 1, 2)
+   * scanr1(P.<Integer>append(), $($(5), $(3), $(2))) gives
+   *     $($(5, 3, 2), $(3, 2), $(2))
+   * </pre>
    * <p><b>Time Complexity:</b> O(length(xs))</p>
    * <p><b>Space Complexity:</b> O(length(xs))</p>
    *
@@ -1790,7 +1819,16 @@ public class P {
   /**
    * iterate(fn, a) returns an infinite iterable of repeated applications of
    * fn to a.
-   *
+   * <p><b>Examples:</b></p><pre>
+   * Function&lt;Integer,Integer&gt; triple = new Function&lt;Integer,Integer&gt;() {
+   *   public Integer apply(Integer value) {
+   *     return value * 3;
+   *   }
+   * };
+   * take(3, iterate(triple, 1)) gives $(1, 3, 9)
+   * head(iterate(triple, 10)) gives 10
+   * head(tail(iterate(triple, 10))) gives 30
+   * </pre>
    * <p><b>Time Complexity:</b> O(1)</p>
    * <p><b>Space Complexity:</b> O(1)</p>
    *
@@ -1830,7 +1868,11 @@ public class P {
 
   /**
    * repeat(x) is an infinite iterable, with x the value of every element.
-   *
+   * <p><b>Examples:</b></p><pre>
+   * take(5, repeat(1)) gives $(1, 1, 1, 1, 1)
+   * head(repeat(1))) gives 1
+   * head(tail(repeat(1))) gives 1
+   * </pre>
    * <p><b>Time Complexity:</b> O(1)</p>
    * <p><b>Space Complexity:</b> O(1)</p>
    *
@@ -1855,7 +1897,13 @@ public class P {
   /**
    * replicate(n, x) is a list of length n with x the value of every element or
    * an empty list if n <= 0.
-   *
+   * <p><b>Examples:</b></p><pre>
+   * replicate(5, 'a') gives s("aaaaa")
+   * replicate(3, 3) gives $(3, 3, 3)
+   * replicate(1, 1) gives $(1)
+   * replicate(-1, 12) gives $()
+   * replicate(0, 12) gives $()
+   * </pre>
    * <p><b>Time Complexity:</b> O(1)</p>
    * <p><b>Space Complexity:</b> O(1)</p>
    *
@@ -1893,7 +1941,11 @@ public class P {
    * cycle() ties a finite list into a circular one, or equivalently, the
    * infinite repetition of the original list. It is the identity on infinite
    * lists.
-   *
+   * <p><b>Examples:</b></p><pre>
+   * take(6, cycle(s("ab"))) gives s("ababab")
+   * take(3, cycle($(3))) gives $(3, 3, 3)
+   * head(cycle($(1, 2, 3))) gives 1
+   * </pre>
    * <p><b>Time Complexity:</b> O(1)</p>
    * <p><b>Space Complexity:</b> O(1)</p>
    *
@@ -2099,6 +2151,56 @@ public class P {
     return new Function<Function<A,Boolean>,Function<Iterable<A>,Iterable<A>>>() {
       @Override public Function<Iterable<A>,Iterable<A>> apply(Function<A,Boolean> value) {
         return takeWhile(value);
+      }
+    };
+  }
+
+  /**
+   * dropWhile p xs returns the suffix remaining after
+   * {@link P#takeWhile(Function, Iterable)}(p, xs).
+   *
+   * <p><b>Examples:</b></p><pre>
+   * dropWhile(_(lt(), 3), $(1,2,3,4,5,1,2,3)) gives $(3,4,5,1,2,3)
+   * dropWhile(_(lt(), 9), $(1,2,3)) gives $()
+   * dropWhile(_(lt(), 0), $(1,2,3)) gives $(1,2,3)
+   * </pre>
+   * <p><b>Time Complexity:</b> O(length(xs))</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param p Predicate to apply to each element.
+   * @param xs Iterable to remove the prefix of.
+   * @return The elements of xs with the prefix that satisfy p removed.
+   */
+  public static <A> Iterable<A> dropWhile(Function<A,Boolean> p, Iterable<A> xs) {
+    final PeekingIterator<A> ite = Iterators.peekingIterator(xs.iterator());
+    while (ite.hasNext() && p.apply(ite.peek())) {
+      ite.next();
+    }
+    return new Iterable<A>() {
+      @Override public Iterator<A> iterator() {
+        return ite;
+      }
+    };
+  }
+
+  /**
+   * Partially applied version of {@link P#dropWhile(Function, Iterable)}.
+   */
+  public static <A> Function<Iterable<A>,Iterable<A>> dropWhile(final Function<A,Boolean> p) {
+    return new Function<Iterable<A>,Iterable<A>>() {
+      @Override public Iterable<A> apply(Iterable<A> value) {
+        return dropWhile(p, value);
+      }
+    };
+  }
+
+  /**
+   * Partially applied version of {@link P#dropWhile(Function, Iterable)}.
+   */
+  public static <A> Function<Function<A,Boolean>,Function<Iterable<A>,Iterable<A>>> dropWhile() {
+    return new Function<Function<A,Boolean>,Function<Iterable<A>,Iterable<A>>>() {
+      @Override public Function<Iterable<A>,Iterable<A>> apply(Function<A,Boolean> value) {
+        return dropWhile(value);
       }
     };
   }

@@ -407,6 +407,12 @@ public class PreludeTests {
     assertElementsEqual($(), takeWhile(_(lt(), 0), $(1,2,3)));
   }
 
+  @Test public final void testDropWhile() {
+    assertElementsEqual($(3,4,5,1,2,3), dropWhile(_(lt(), 3), $(1,2,3,4,5,1,2,3)));
+    assertElementsEqual($(), dropWhile(_(lt(), 9), $(1,2,3)));
+    assertElementsEqual($(1,2,3), dropWhile(_(lt(), 0), $(1,2,3)));
+  }
+
 
 
 
