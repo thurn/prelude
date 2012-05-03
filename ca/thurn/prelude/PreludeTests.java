@@ -64,6 +64,18 @@ public class PreludeTests {
     }
   }
 
+  @Test public final void testFilter() {
+    assertElementsEqual($(2, 4), filter(even(), $(1,2,3,4)));
+    assertElementsEqual($(1, 2), filter(_(lt(), 3), $(1,2,3,4)));
+    assertElementsEqual($(), filter(even(), $(1)));
+    assertElementsEqual($(), filter(even(), P.<Integer>$()));
+  }
+
+  @Test public final void testIsEmpty() {
+    assertEquals(true, isEmpty(empty));
+    assertEquals(false, isEmpty(one));
+  }
+
   @Test public final void testHead() {
     assertEquals("1", head(one));
     assertEquals("1", head(two));
@@ -139,50 +151,18 @@ public class PreludeTests {
   }
 
   @Test public final void testFoldl() {
-    assertEquals(new Integer(6),
-        foldl(
-            plus(),
-            0,
-            $(1, 2, 3)));
-    assertElementsEqual($(0, 1, 2, 3),
-        foldl(
-            P.<Integer>append(),
-            $(0),
-            $($(1), $(2), $(3))));
-    assertEquals(new Integer(0),
-        foldl(
-            P.<Integer,Integer>constant(),
-            0,
-            $(1, 2, 3)));
-    assertElementsEqual(s("123"),
-        foldl(
-            P.<Character>append(),
-            s(""),
-            $(s("1"), s("2"), s("3"))));
-    assertEquals(new Integer(0),
-        foldl(
-            minus(),
-            10,
-            $(5, 3, 2)));
+    assertEquals(new Integer(6), foldl(plus(), 0, $(1, 2, 3)));
+    assertElementsEqual($(0, 1, 2, 3), foldl(P.<Integer>append(), $(0), $($(1), $(2), $(3))));
+    assertEquals(new Integer(0), foldl(P.<Integer,Integer>constant(), 0, $(1, 2, 3)));
+    assertElementsEqual(s("123"), foldl(P.<Character>append(), s(""), $(s("1"), s("2"), s("3"))));
+    assertEquals(new Integer(0), foldl(minus(), 10, $(5, 3, 2)));
   }
 
   @Test public final void testFoldl1() {
-    assertEquals(new Integer(6),
-        foldl1(
-            plus(),
-            $(1, 2, 3)));
-    assertElementsEqual($(1, 2, 3),
-        foldl1(
-            P.<Integer>append(),
-            $($(1), $(2), $(3))));
-    assertEquals(new Integer(1),
-        foldl1(
-            P.<Integer,Integer>constant(),
-            $(1, 2, 3)));
-    assertElementsEqual(s("123"),
-        foldl1(
-            P.<Character>append(),
-            $(s("1"), s("2"), s("3"))));
+    assertEquals(new Integer(6), foldl1(plus(), $(1, 2, 3)));
+    assertElementsEqual($(1, 2, 3), foldl1(P.<Integer>append(), $($(1), $(2), $(3))));
+    assertEquals(new Integer(1), foldl1(P.<Integer,Integer>constant(), $(1, 2, 3)));
+    assertElementsEqual(s("123"), foldl1(P.<Character>append(), $(s("1"), s("2"), s("3"))));
   }
 
   @Test(expected = NoSuchElementException.class)
@@ -191,39 +171,15 @@ public class PreludeTests {
   }
 
   @Test public final void testFoldr() {
-    assertEquals(new Integer(-6),
-        foldr(
-            minus(),
-            10,
-            $(5, 3, 2)));
-    assertElementsEqual($(1, 2, 3, 0),
-        foldr(
-            P.<Integer>append(),
-            $(0),
-            $($(1), $(2), $(3))));
-    assertEquals(true,
-        foldr(
-            and(),
-            true,
-            $(true, true, true)
-            ));
-    assertEquals(true,
-        foldr(
-            or(),
-            false,
-            $(false, false, true)
-            ));
+    assertEquals(new Integer(-6), foldr(minus(), 10, $(5, 3, 2)));
+    assertElementsEqual($(1, 2, 3, 0), foldr(P.<Integer>append(), $(0), $($(1), $(2), $(3))));
+    assertEquals(true, foldr(and(), true, $(true, true, true)));
+    assertEquals(true, foldr(or(), false, $(false, false, true)));
   }
 
   @Test public final void testFoldr1() {
-    assertEquals(new Integer(-6),
-        foldr1(
-            minus(),
-            $(5, 3, 2, 10)));
-    assertElementsEqual($(1, 2, 3, 0),
-        foldr1(
-            P.<Integer>append(),
-            $($(1), $(2), $(3), $(0))));
+    assertEquals(new Integer(-6), foldr1(minus(), $(5, 3, 2, 10)));
+    assertElementsEqual($(1, 2, 3, 0), foldr1(P.<Integer>append(), $($(1), $(2), $(3), $(0))));
   }
 
 

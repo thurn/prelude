@@ -3,6 +3,10 @@
  */
 package ca.thurn.prelude;
 
+import static ca.thurn.prelude.P.$;
+import static ca.thurn.prelude.P.concatMap;
+import static ca.thurn.prelude.P.s;
+
 import com.google.common.base.*;
 import com.google.common.collect.*;
 
@@ -858,6 +862,23 @@ public class P {
     };
   }
 
+  /**
+   * filter, applied to a predicate and an iterable, returns an iterable of
+   * those elements that satisfy the predicate.
+   *
+   * <p><b>Examples:</b></p><pre>
+   * filter(even(), $(1,2,3,4)) gives $(2, 4)
+   * filter(_(lt(), 3), $(1,2,3,4)) gives $(1, 2)
+   * filter(even(), $(1)) gives $()
+   * filter(even(), P.<Integer>$()) gives $()
+   * </pre>
+   * <p><b>Time Complexity:</b> O(length(xs))</p>
+   * <p><b>Space Complexity:</b> O(length(xs))</p>
+   *
+   * @param pred Predicate to check each element against.
+   * @param xs Iterable to filter.
+   * @return An iterable containing the elements of xs that satisfy pred.
+   */
   public static <A> Iterable<A> filter(final Function<A,Boolean> pred, Iterable<A> xs) {
     return Iterables.filter(xs, new Predicate<A>() {
       @Override public boolean apply(A arg) {
@@ -866,6 +887,9 @@ public class P {
     });
   }
 
+  /**
+   * Partially applied version of {@link P#filter(Function, Iterable)}.
+   */
   public static <A> Function<Iterable<A>,Iterable<A>> filter(final Function<A,Boolean> pred) {
     return new Function<Iterable<A>,Iterable<A>>() {
       @Override public Iterable<A> apply(Iterable<A> value) {
@@ -874,6 +898,9 @@ public class P {
     };
   }
 
+  /**
+   * Partially applied version of {@link P#filter(Function, Iterable)}.
+   */
   public static <A> Function<Function<A,Boolean>,Function<Iterable<A>,Iterable<A>>> filter() {
     return new Function<Function<A,Boolean>,Function<Iterable<A>,Iterable<A>>>() {
       @Override public Function<Iterable<A>,Iterable<A>> apply(Function<A,Boolean> value) {
@@ -882,10 +909,26 @@ public class P {
     };
   }
 
+  /**
+   * Test whether an iterable is empty.
+   *
+   * <p><b>Examples:</b></p><pre>
+   * isEmpty(empty) gives true
+   * isEmpty(one) gives false
+   * </pre>
+   * <p><b>Time Complexity:</b> O(1)</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param xs Iterable to check.
+   * @return true if the iterable has no elements.
+   */
   public static <A> Boolean isEmpty(Iterable<A> xs) {
     return Iterables.isEmpty(xs);
   }
 
+  /**
+   * Partially applied version of {@link P#isEmpty(Iterable)}.
+   */
   public static <A> Function<Iterable<A>,Boolean> isEmpty() {
     return new Function<Iterable<A>,Boolean>() {
       @Override public Boolean apply(Iterable<A> value) {
@@ -903,6 +946,11 @@ public class P {
   /**
    * Extract the first element of an Iterable, which must be non-empty.
    *
+   * <p><b>Examples:</b></p><pre>
+   * head($("1")) gives "1"
+   * head($("1", "2")) gives "1"
+   * head($("1", "2", "3")) gives "1"
+   * </pre>
    * <p><b>Time Complexity:</b> O(1)</p>
    * <p><b>Space Complexity:</b> O(1)</p>
    *
@@ -928,6 +976,11 @@ public class P {
   /**
    * Extract the last element of an Iterable, which must be finite and non-empty.
    *
+   * <p><b>Examples:</b></p><pre>
+   * last($("1")) gives "1"
+   * last($("1", "2")) gives "2"
+   * last($("1", "2", "3")) gives "3"
+   * </pre>
    * <p><b>Time Complexity:</b> O(length(xs))</p>
    * <p><b>Space Complexity:</b> O(1)</p>
    *
@@ -955,6 +1008,11 @@ public class P {
    * non-empty. The resulting Iterable is unmodifiable. Mutating xs after
    * passing it to this function causes undefined behavior.
    *
+   * <p><b>Examples:</b></p><pre>
+   * tail($("1")) gives $()
+   * tail($("1", "2")) gives $("2")
+   * tail($("1", "2", "3")) gives $("2", "3")
+   * </pre>
    * <p><b>Time Complexity:</b> O(1)</p>
    * <p><b>Space Complexity:</b> O(1)</p>
    *
@@ -988,6 +1046,11 @@ public class P {
    * must be non-empty. The resulting Iterable is unmodifiable. Mutating xs
    * after passing it to this function causes undefined behavior.
    *
+   * <p><b>Examples:</b></p><pre>
+   * init($("1")) gives $()
+   * init($("1", "2")) gives $("1")
+   * init($("1", "2", "3")) gives $("1", "2")
+   * </pre>
    * <p><b>Time Complexity:</b> O(1)</p>
    * <p><b>Space Complexity:</b> O(1)</p>
    *
@@ -1017,6 +1080,12 @@ public class P {
   /**
    * Return the length of an Iterable, which must be finite.
    *
+   * <p><b>Examples:</b></p><pre>
+   * length($()) gives 0
+   * length($("1")) gives 1
+   * length($("1", "2")) gives 2
+   * length($("1", "2", "3")) gives 3
+   * </pre>
    * <p><b>Time Complexity:</b> O(length(xs)) unless the Iterable implements
    *     {@link Collection#size()}, in which case that implementation is
    *     used.</p>
@@ -1043,6 +1112,11 @@ public class P {
   /**
    * Iterable index (subscript) operator, starting from 0.
    *
+   * <p><b>Examples:</b></p><pre>
+   * at($("1"), 0) gives "1"
+   * at($("1", "2"), 0) gives "1"
+   * at($("1", "2", "3"), 2) gives "3"
+   * </pre>
    * <p><b>Time Complexity:</b>O(1)</p>
    * <p><b>Space Complexity:</b>O(1)</p>
    *
@@ -1079,6 +1153,12 @@ public class P {
   /**
    * reverse(xs) returns the elements of xs in reverse order. xs must be finite.
    *
+   * <p><b>Examples:</b></p><pre>
+   * reverse($()) gives $()
+   * reverse($("1")) gives $("1")
+   * reverse($("1", "2")) gives $("2", "1")
+   * reverse($("1", "2", "3")) gives $("3", "2", "1")
+   * </pre>
    * <p><b>Time Complexity: O(length(xs))</b></p>
    * <p><b>Space Complexity: O(length(xs))</b></p>
    *
@@ -1105,6 +1185,14 @@ public class P {
    * left-identity of the operator), and an iterable, reduces the iterable
    * using the binary operator, from left to right. The list must be finite.
    *
+   * <p><b>Examples:</b></p><pre>
+   * foldl(plus(), 0, $(1, 2, 3)) gives 6
+   * foldl(P.<Integer>append(), $(0), $($(1), $(2), $(3))) gives $(0, 1, 2, 3)
+   * foldl(P.<Integer,Integer>constant(), 0, $(1, 2, 3)) gives 0
+   * foldl(P.<Character>append(), s(""), $(s("1"), s("2"), s("3"))) gives
+   *     s("123")
+   * foldl(minus(), 10, $(5, 3, 2)) gives 0
+   * </pre>
    * <p><b>Time Complexity: O(length(xs))</b></p>
    * <p><b>Space Complexity: O(1)</b></p>
    *
@@ -1162,6 +1250,12 @@ public class P {
    * has no starting value argument, and thus must be applied to finite
    * non-empty iterables.
    *
+   * <p><b>Examples:</b></p><pre>
+   * foldl1(plus(), $(1, 2, 3)) gives 6
+   * foldl1(P.<Integer>append(), $($(1), $(2), $(3))) gives $(1, 2, 3)
+   * foldl1(P.<Integer,Integer>constant(), $(1, 2, 3)) gives 1
+   * foldl1(P.<Character>append(), $(s("1"), s("2"), s("3"))) gives s("123")
+   * </pre>
    * <p><b>Time Complexity: O(length(xs))</b></p>
    * <p><b>Space Complexity: O(1)</b></p>
    *
@@ -1203,6 +1297,12 @@ public class P {
    * using the binary operator, from right to left. This is a strict
    * implementation, so it must be applied to a finite iterable.
    *
+   * <p><b>Examples:</b></p><pre>
+   * foldr(minus(), 10, $(5, 3, 2)) gives -6
+   * foldr(P.<Integer>append(), $(0), $($(1), $(2), $(3))) gives $(1, 2, 3, 0)
+   * foldr(and(), true, $(true, true, true)) gives true
+   * foldr(or(), false, $(false, false, true)) gives true
+   * </pre>
    * <p><b>Time Complexity:</b> O(length(xs))</p>
    * <p><b>Space Complexity:</b> O(length(xs))</p>
    *
@@ -1260,6 +1360,10 @@ public class P {
    * foldr1 is a variant of foldr that has no starting value argument, and thus
    * must be applied to finite non-empty iterables.
    *
+   * <p><b>Examples:</b></p><pre>
+   * foldr1(minus(), $(5, 3, 2, 10)) gives -6
+   * foldr1(P.<Integer>append(), $($(1), $(2), $(3), $(0))) gives $(1, 2, 3, 0)
+   * </pre>
    * <p><b>Time Complexity:</b> O(length(xs))</p>
    * <p><b>Space Complexity:</b> O(length(xs))</p>
    *
@@ -1300,6 +1404,11 @@ public class P {
    * This function is called 'and' in Haskell, but that name was used here for
    * the function Haskell calls (&&).
    *
+   * <p><b>Examples:</b></p><pre>
+   * andList($(true, true, true)) gives true
+   * andList($(true, false, true)) gives false
+   * andList(P.<Boolean>$()) gives true
+   * </pre>
    * <p><b>Time Complexity:</b> O(length(xs))</p>
    * <p><b>Space Complexity:</b> O(1)</p>
    *
@@ -1326,6 +1435,11 @@ public class P {
    * This function is called 'or' in Haskell, but that name was used here for
    * the function Haskell calls (||).
    *
+   * <p><b>Examples:</b></p><pre>
+   * any(even(), $(1, 2, 3)) gives true
+   * any(even(), $(1, 3, 5)) gives false
+   * any(even(), P.<Integer>$()) gives false
+   * </pre>
    * <p><b>Time Complexity:</b> O(length(xs))</p>
    * <p><b>Space Complexity:</b> O(1)</p>
    *
@@ -1351,6 +1465,11 @@ public class P {
    * Applied to a predicate and an iterable, any determines if any element of the
    * iterable satisfies the predicate.
    *
+   * <p><b>Examples:</b></p><pre>
+   * any(even(), $(1, 2, 3)) gives true
+   * any(even(), $(1, 3, 5)) gives false
+   * any(even(), P.<Integer>$()) gives false
+   * </pre>
    * <p><b>Time Complexity:</b> O(length(xs))</p>
    * <p><b>Space Complexity:</b> O(1)</p>
    *
@@ -1388,6 +1507,11 @@ public class P {
    * Applied to a predicate and an iterable, all determines if all elements of the
    * iterable satisfy the predicate.
    *
+   * <p><b>Examples:</b></p><pre>
+   * all(even(), $(2, 4, 6)) gives true
+   * all(even(), $(1, 2, 3)) gives false
+   * all(even(), P.<Integer>$()) gives true
+   * </pre>
    * <p><b>Time Complexity:</b> O(length(xs))</p>
    * <p><b>Space Complexity:</b> O(1)</p>
    *
@@ -1424,6 +1548,11 @@ public class P {
   /**
    * The sum function computes the sum of a finite iterable over integers.
    *
+   * <p><b>Examples:</b></p><pre>
+   * sum($(1, 2, 3)) gives 6
+   * sum($(-1, -2, -3)) gives 6
+   * sum(P.<Integer>$()) gives 0
+   * </pre>
    * <p><b>Time Complexity:</b> O(length(xs))</p>
    * <p><b>Space Complexity:</b> O(1)</p>
    *
@@ -1449,6 +1578,11 @@ public class P {
    * The product function computes the product of a finite iterable over
    * integers.
    *
+   * <p><b>Examples:</b></p><pre>
+   * product($(1, 2, 3, 4)) gives 24
+   * product($(-1, 2, -3, 4)) gives 24
+   * product(P.<Integer>$()) gives 1
+   * </pre>
    * <p><b>Time Complexity:</b> O(length(xs))</p>
    * <p><b>Space Complexity:</b> O(1)</p>
    *
@@ -1473,6 +1607,11 @@ public class P {
   /**
    * Concatenate an iterable of iterables.
    *
+   * <p><b>Examples:</b></p><pre>
+   * concat($(s("1"), s("2"), s("3"))) gives s("123")
+   * concat($($(1), $(2), $(3))) gives $(1, 2, 3)
+   * concat($($())) gives $()
+   * </pre>
    * <p><b>Time Complexity:</b> O(1)</p>
    * <p><b>Space Complexity:</b> O(1)</p>
    *
@@ -1498,6 +1637,16 @@ public class P {
   /**
    * Map a function over an iterable and concatenate the results.
    *
+   * <p><b>Examples:</b></p><pre>
+   * Function&lt;String,Iterable&lt;Character&gt;&gt; foldFn =
+   *     new Function&lt;String,Iterable&lt;Character&gt;&gt;() {
+   *   public Iterable&lt;Character&gt; apply(String str) {
+   *     return s(str + ",");
+   *   }
+   * };
+   * concatMap(foldFn, $("foo", "bar", "baz")) gives s("foo,bar,baz,")
+   * concatMap(foldFn, P.<String>$()) gives s()
+   * </pre>
    * <p><b>Time Complexity:</b> O(length(xs))</p>
    * <p><b>Space Complexity:</b> O(length(xs))</p>
    *
@@ -1538,6 +1687,7 @@ public class P {
   /**
    * maximum returns the maximum value from an iterable, which must be non-empty,
    * finite, and of an ordered type.
+   *
    * <p><b>Examples:</b></p><pre>
    * maximum($(1, 3, 10, 2, 8)) gives 10
    * maximum($(1)) gives 1
@@ -1568,6 +1718,7 @@ public class P {
   /**
    * minimum returns the minimum value from an iterable, which must be non-empty,
    * finite, and of an ordered type.
+   *
    * <p><b>Examples:</b></p><pre>
    * minimum($(1, 3, 10, 2, 8)) gives 1
    * minimum($(1)) gives 1
@@ -1599,6 +1750,7 @@ public class P {
    * scanl is similar to {@link P#foldl(Function, Object, Iterable)}, but
    * returns an iterable of successive reduced values from the left. Note that
    * last(scanl(fn,a,xs)) is foldl(f,z,xs).
+   *
    * <p><b>Examples:</b></p><pre>
    * scanl(minus(), 10, $(5, 3, 2)) gives $(10, 5, 2, 0)
    * scanl(P.<Integer>append(), $(10), $($(5), $(3), $(2))) gives
@@ -1664,6 +1816,7 @@ public class P {
   /**
    * scanl1 is a variant of {@link P#scanl(Function, Object, Iterable)} that
    * has no starting value argument.
+   *
    * <p><b>Examples:</b></p><pre>
    * scanl1(minus(), $(5, 3, 2)) gives $(5, 2, 0)
    * scanl1(P.<Integer>append(), $($(5), $(3), $(2))) gives
@@ -1708,6 +1861,7 @@ public class P {
    * scanr is the right-to-left dual of
    * {@link P#scanl(Function, Object, Iterable)}. Note that
    * head(scanr(fn, b, xs)) is foldr(f, b, xs).
+   *
    * <p><b>Examples:</b></p><pre>
    * scanr(minus(), 10, $(5, 3, 2)) gives $(-6, 11, -8, 10)
    * scanr(P.<Integer>append(), $(10), $($(5), $(3), $(2))) gives
@@ -1776,6 +1930,7 @@ public class P {
   /**
    * scanr1 is a variant of {@link P#scanr(Function, Object, Iterable)} that
    * has no starting value argument.
+   *
    * <p><b>Examples:</b></p><pre>
    * scanr1(minus(), $(5, 3, 2)) gives $(4, 1, 2)
    * scanr1(P.<Integer>append(), $($(5), $(3), $(2))) gives
@@ -1819,6 +1974,7 @@ public class P {
   /**
    * iterate(fn, a) returns an infinite iterable of repeated applications of
    * fn to a.
+   *
    * <p><b>Examples:</b></p><pre>
    * Function&lt;Integer,Integer&gt; triple = new Function&lt;Integer,Integer&gt;() {
    *   public Integer apply(Integer value) {
@@ -1868,6 +2024,7 @@ public class P {
 
   /**
    * repeat(x) is an infinite iterable, with x the value of every element.
+   *
    * <p><b>Examples:</b></p><pre>
    * take(5, repeat(1)) gives $(1, 1, 1, 1, 1)
    * head(repeat(1))) gives 1
@@ -1897,6 +2054,7 @@ public class P {
   /**
    * replicate(n, x) is a list of length n with x the value of every element or
    * an empty list if n <= 0.
+   *
    * <p><b>Examples:</b></p><pre>
    * replicate(5, 'a') gives s("aaaaa")
    * replicate(3, 3) gives $(3, 3, 3)
@@ -1941,6 +2099,7 @@ public class P {
    * cycle() ties a finite list into a circular one, or equivalently, the
    * infinite repetition of the original list. It is the identity on infinite
    * lists.
+   *
    * <p><b>Examples:</b></p><pre>
    * take(6, cycle(s("ab"))) gives s("ababab")
    * take(3, cycle($(3))) gives $(3, 3, 3)
