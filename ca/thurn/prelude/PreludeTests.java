@@ -51,7 +51,7 @@ public class PreludeTests {
    }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  private <A,B> void assertPairEquals(Pair<A,B> pair1, Pair<A,B> pair2) {
+  private <A,B,C,D> void assertPairEquals(Pair<A,B> pair1, Pair<C,D> pair2) {
     if (pair1.first instanceof Iterable && pair2.first instanceof Iterable) {
       assertElementsEqual((Iterable)pair1.first, (Iterable)pair2.first);
     } else {
@@ -367,6 +367,18 @@ public class PreludeTests {
     assertElementsEqual($(3,4,5,1,2,3), dropWhile(_(lt(), 3), $(1,2,3,4,5,1,2,3)));
     assertElementsEqual($(), dropWhile(_(lt(), 9), $(1,2,3)));
     assertElementsEqual($(1,2,3), dropWhile(_(lt(), 0), $(1,2,3)));
+  }
+
+  @Test public final void testSpan() {
+    assertPairEquals(t($(1,2),$(3,4,1,2,3,4)), span(_(lt(), 3), $(1,2,3,4,1,2,3,4)));
+    assertPairEquals(t($(1,2,3),$()), span(_(lt(), 9), $(1,2,3)));
+    assertPairEquals(t($(),$(1,2,3)), span(_(lt(), 0), $(1,2,3)));
+  }
+
+  @Test public final void testBreakList() {
+     assertPairEquals(t($(1,2,3),$(4,1,2,3,4)), breakList(_(gt(), 3), $(1,2,3,4,1,2,3,4)));
+     assertPairEquals(t($(),$(1,2,3)), breakList(_(lt(), 9), $(1,2,3)));
+     assertPairEquals(t($(1,2,3),$()), breakList(_(gt(), 9), $(1,2,3)));
   }
 
 

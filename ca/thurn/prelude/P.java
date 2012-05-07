@@ -4,8 +4,13 @@
 package ca.thurn.prelude;
 
 import static ca.thurn.prelude.P.$;
+import static ca.thurn.prelude.P._;
+import static ca.thurn.prelude.P.breakList;
 import static ca.thurn.prelude.P.concatMap;
+import static ca.thurn.prelude.P.gt;
+import static ca.thurn.prelude.P.lt;
 import static ca.thurn.prelude.P.s;
+import static ca.thurn.prelude.P.t;
 
 import com.google.common.base.*;
 import com.google.common.collect.*;
@@ -18,6 +23,34 @@ import java.util.*;
  *
  */
 public class P {
+
+  /**
+   * Boolean 'not'.
+   *
+   * <p><b>Examples:</b></p><pre>
+   * not(true) gives false
+   * </pre>
+   * <p><b>Time Complexity:</b> O(1)</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param x Value to use.
+   * @return Boolean negation of x.
+   */
+  public static Boolean not(Boolean x) {
+    return !x;
+  }
+
+  /**
+   * Partially applied version of {@link P#not(Boolean)}.
+   */
+  public static Function<Boolean,Boolean> not() {
+    return new Function<Boolean,Boolean>() {
+      @Override public Boolean apply(Boolean value) {
+        return not(value);
+      }
+    };
+  }
+
   static class Maybe<A> {
     final A value;
     private Maybe(A value) {
@@ -282,6 +315,41 @@ public class P {
     };
   }
 
+  /**
+   * Checks if integer x is greater than integer y.
+   *
+   * <p><b>Time Complexity:</b> O(1)</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param x First integer.
+   * @param y Second integer.
+   * @return True if x is greater than y.
+   */
+  public static Boolean gt(Integer x, Integer y) {
+    return x > y;
+  }
+
+  /**
+   * Partially applied version of {@link P#gt(Comparable, Comparable)}.
+   */
+  public static Function<Integer,Boolean> gt(final Integer x) {
+    return new Function<Integer,Boolean>() {
+      @Override public Boolean apply(Integer value) {
+        return gt(x, value);
+      }
+    };
+  }
+
+  /**
+   * Partially applied version of {@link P#gt(Comparable, Comparable)}.
+   */
+  public static Function<Integer,Function<Integer,Boolean>> gt() {
+    return new Function<Integer,Function<Integer,Boolean>>() {
+      @Override public Function<Integer,Boolean> apply(Integer value) {
+        return gt(value);
+      }
+    };
+  }
 
   /**
    * The boolean conjunction of two boolean values.
@@ -2316,7 +2384,7 @@ public class P {
 
   /**
    * dropWhile p xs returns the suffix remaining after
-   * {@link P#takeWhile(Function, Iterable)}(p, xs).
+   * {@link P#takeWhile(Function, Iterable) takeWhile}(p, xs).
    *
    * <p><b>Examples:</b></p><pre>
    * dropWhile(_(lt(), 3), $(1,2,3,4,5,1,2,3)) gives $(3,4,5,1,2,3)
@@ -2364,6 +2432,102 @@ public class P {
     };
   }
 
+  /**
+   * span, applied to a predicate p and an iterable xs, returns a tuple where
+   * the first element is longest prefix (possibly empty) of xs of elements
+   * that satisfy p and second element is the remainder of the iterable.
+   * span(p, xs) is equivalent to t({@link P#takeWhile(Function, Iterable) takeWhile}(p, xs),
+   * {@link P#dropWhile(Function, Iterable) dropWhile}(p, xs))
+   * <p><b>Examples:</b></p><pre>
+   * span(_(lt(), 3), $(1,2,3,4,1,2,3,4)) gives t($(1,2),$(3,4,1,2,3,4))
+   * span(_(lt(), 9), $(1,2,3)) gives t($(1,2,3),$())
+   * span(_(lt(), 0), $(1,2,3)) gives t($(),$(1,2,3))
+   * </pre>
+   * <p><b>Time Complexity:</b> O(length(xs))</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param p The predicate to split the iterable with.
+   * @param xs The iterable to split.
+   * @return t(takeWhile(p, xs), dropWhile(p, xs)).
+   */
+  public static <A> Pair<Iterable<A>,Iterable<A>> span(Function<A,Boolean> p, Iterable<A> xs) {
+    return t(takeWhile(p, xs), dropWhile(p, xs));
+  }
+
+  /**
+   * Partially applied version of {@link P#span(Function, Iterable)}.
+   */
+  public static <A> Function<Iterable<A>,Pair<Iterable<A>,Iterable<A>>> span(
+      final Function<A,Boolean> p) {
+    return new Function<Iterable<A>,Pair<Iterable<A>,Iterable<A>>>() {
+      @Override public Pair<Iterable<A>,Iterable<A>> apply(Iterable<A> value) {
+        return span(p, value);
+      }
+    };
+  }
+
+  /**
+   * Partially applied version of {@link P#span(Function, Iterable)}.
+   */
+  public static <A>
+  Function<Function<A,Boolean>,Function<Iterable<A>,Pair<Iterable<A>,Iterable<A>>>> span() {
+    return new Function<Function<A,Boolean>,Function<Iterable<A>,Pair<Iterable<A>,Iterable<A>>>>() {
+      @Override public Function<Iterable<A>,Pair<Iterable<A>,Iterable<A>>> apply(
+          Function<A,Boolean> value) {
+        return span(value);
+      }
+    };
+  }
+
+  /**
+   * breakList, applied to a predicate p and an iterable xs, returns a tuple
+   * where the first element is longest prefix (possibly empty) of xs of
+   * elements that do not satisfy p and second element is the remainder of the
+   * iterable. breakList(p, xs) is equivalent to
+   * {@link P#span(Function, Iterable) span}(
+   * {@link P#compose(Function, Function) compose}
+   * ({@link P#not() not}(), p), xs).
+   *
+   * <p><b>Examples:</b></p><pre>
+   * breakList(_(gt(), 3), $(1,2,3,4,1,2,3,4)) gives t($(1,2,3),$(4,1,2,3,4))
+   * breakList(_(lt(), 9), $(1,2,3)) gives t($(),$(1,2,3))
+   * breakList(_(gt(), 9), $(1,2,3)) gives t($(1,2,3),$())
+   * </pre>
+   * <p><b>Time Complexity:</b> O(length(xs))</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param p Predicate to break the iterable with.
+   * @param xs The iterable to break.
+   * @return span(compose(not(), p), xs).
+   */
+  public static <A> Pair<Iterable<A>,Iterable<A>> breakList(Function<A,Boolean> p, Iterable<A> xs) {
+    return span(compose(not(), p), xs);
+  }
+
+  /**
+   * Partially applied version of {@link P#breakList(Function, Iterable)}.
+   */
+  public static <A> Function<Iterable<A>,Pair<Iterable<A>,Iterable<A>>> breakList(
+      final Function<A,Boolean> p) {
+    return new Function<Iterable<A>,Pair<Iterable<A>,Iterable<A>>>() {
+      @Override public Pair<Iterable<A>,Iterable<A>> apply(Iterable<A> value) {
+        return breakList(p, value);
+      }
+    };
+  }
+
+  /**
+   * Partially applied version of {@link P#breakList(Function, Iterable)}.
+   */
+  public static <A>
+  Function<Function<A,Boolean>,Function<Iterable<A>,Pair<Iterable<A>,Iterable<A>>>> breakList() {
+    return new Function<Function<A,Boolean>,Function<Iterable<A>,Pair<Iterable<A>,Iterable<A>>>>() {
+      @Override public Function<Iterable<A>,Pair<Iterable<A>,Iterable<A>>> apply(
+          Function<A,Boolean> value) {
+        return breakList(value);
+      }
+    };
+  }
 
 
 
