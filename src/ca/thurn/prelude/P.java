@@ -4,13 +4,8 @@
 package ca.thurn.prelude;
 
 import static ca.thurn.prelude.P.$;
-import static ca.thurn.prelude.P._;
-import static ca.thurn.prelude.P.breakList;
-import static ca.thurn.prelude.P.concatMap;
-import static ca.thurn.prelude.P.gt;
-import static ca.thurn.prelude.P.lt;
-import static ca.thurn.prelude.P.s;
-import static ca.thurn.prelude.P.t;
+import static ca.thurn.prelude.P.orList;
+import static org.junit.Assert.assertEquals;
 
 import com.google.common.base.*;
 import com.google.common.collect.*;
@@ -66,6 +61,9 @@ public class P {
     return new Maybe<A>(value);
   }
 
+  /**
+   * Partially applied version of {@link P#Just()}
+   */
   public static <A> Function<A, Maybe<A>> Just() {
     return new Function<A, Maybe<A>>() {
       @Override public Maybe<A> apply(A value) {
@@ -1504,9 +1502,10 @@ public class P {
    * the function Haskell calls (||).
    *
    * <p><b>Examples:</b></p><pre>
-   * any(even(), $(1, 2, 3)) gives true
-   * any(even(), $(1, 3, 5)) gives false
-   * any(even(), P.<Integer>$()) gives false
+   * assertEquals(true, orList($(true, true, true)));
+   * assertEquals(true, orList($(true, false, true)));
+   * assertEquals(false, orList($(false, false, false)));
+   * assertEquals(false, orList(P.<Boolean>$()));
    * </pre>
    * <p><b>Time Complexity:</b> O(length(xs))</p>
    * <p><b>Space Complexity:</b> O(1)</p>
@@ -2528,6 +2527,97 @@ public class P {
       }
     };
   }
+  
+    /**
+     * elem is the iteratable membership predicate. For the result to be false, the iterable must
+     * be finite; true, however, results from an element equal to x found at a finite index of a
+     * finite or infinite iterable.
+     *
+     * <p><b>Examples:</b></p><pre>
+     * elem(1, $()) gives false
+     * elem(1, $(1)) gives true
+     * elem(1, $(1,2,3)) gives true
+     * elem(4, $(1,2,3)) gives false
+     * </pre>
+     * <p><b>Time Complexity:</b> O(length(xs))</p>
+     * <p><b>Space Complexity:</b> O(1)</p>
+     *
+     * @param a Element to search for.
+     * @param xs Iterable to search in.
+     * @return true if x.equals(a) is true for some x in xs.
+     */
+  public static <A> boolean elem(A a, Iterable<A> xs) {
+    return Iterables.contains(xs, a);
+  }
+  
+  /**
+   * Partially applied version of {@link P#elem(Object, Iterable)}
+   */
+  public static <A> Function<Iterable<A>, Boolean> elem(final A a) {
+    return new Function<Iterable<A>, Boolean>() {
+      @Override
+      public Boolean apply(Iterable<A> value) {
+        return elem(a, value);
+      }
+    };
+  }
+  
+  /**
+   * Partially applied version of {@link P#elem(Object, Iterable)}
+   */
+  public static <A> Function<A, Function<Iterable<A>,Boolean>> elem() {
+    return new Function<A, Function<Iterable<A>,Boolean>>() {
+      @Override
+      public Function<Iterable<A>,Boolean> apply(A value) {
+        return elem(value);
+      }
+    };
+  }
+
+  /**
+   * notElem is the negation of {@link P#elem()}.
+   *
+   * <p><b>Examples:</b></p><pre>
+   * notElem(1, $()) gives true
+   * notElem(1, $(1)) gives false
+   * notElem(1, $(1,2,3)) gives false
+   * notElem(4, $(1,2,3)) gives true
+   * </pre>
+   * <p><b>Time Complexity:</b> O(length(xs))</p>
+   * <p><b>Space Complexity:</b> O(1)</p>
+   *
+   * @param a Element to search for.
+   * @param xs Iterable to search in.
+   * @return true if x.equals(a) is not true for any x in xs.
+   */
+  public static <A> boolean notElem(A a, Iterable<A> xs) {
+    return !Iterables.contains(xs, a);
+  }
+
+  /**
+   * Partially applied version of {@link P#notElem(Object, Iterable)}
+   */
+  public static <A> Function<Iterable<A>, Boolean> notElem(final A a) {
+    return new Function<Iterable<A>, Boolean>() {
+      @Override
+      public Boolean apply(Iterable<A> value) {
+        return notElem(a, value);
+      }
+    };
+  }
+
+  /**
+   * Partially applied version of {@link P#notElem(Object, Iterable)}
+   */
+  public static <A> Function<A, Function<Iterable<A>,Boolean>> notElem() {
+    return new Function<A, Function<Iterable<A>,Boolean>>() {
+      @Override
+      public Function<Iterable<A>,Boolean> apply(A value) {
+        return notElem(value);
+      }
+    };
+  }
+  
 
 
 

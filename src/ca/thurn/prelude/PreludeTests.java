@@ -376,12 +376,24 @@ public class PreludeTests {
   }
 
   @Test public final void testBreakList() {
-     assertPairEquals(t($(1,2,3),$(4,1,2,3,4)), breakList(_(gt(), 3), $(1,2,3,4,1,2,3,4)));
-     assertPairEquals(t($(),$(1,2,3)), breakList(_(lt(), 9), $(1,2,3)));
-     assertPairEquals(t($(1,2,3),$()), breakList(_(gt(), 9), $(1,2,3)));
+    assertPairEquals(t($(1,2,3),$(4,1,2,3,4)), breakList(_(gt(), 3), $(1,2,3,4,1,2,3,4)));
+    assertPairEquals(t($(),$(1,2,3)), breakList(_(lt(), 9), $(1,2,3)));
+    assertPairEquals(t($(1,2,3),$()), breakList(_(gt(), 9), $(1,2,3)));
   }
 
+  @Test public final void testElem() {
+    assertFalse(elem(1, $()));
+    assertTrue(elem(1, $(1)));
+    assertTrue(elem(1, $(1,2,3)));
+    assertFalse(elem(4, $(1,2,3)));
+  }
 
+  @Test public final void testNotElem() {
+    assertTrue(notElem(1, $()));
+    assertFalse(notElem(1, $(1)));
+    assertFalse(notElem(1, $(1,2,3)));
+    assertTrue(notElem(4, $(1,2,3)));
+  }
 
 
 
