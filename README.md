@@ -1,3 +1,3 @@
-This is an implementation of the Haskell prelude in Java. Obviously, there are a number of limitations in Java's syntax and type system that prevent a full port, but many of the key functions and concepts can be represented.
+This is an implementation of the Haskell prelude in Java. Obviously, there are a number of limitations in Java's syntax and type system that prevent a full port, but many of the key functions and concepts can be represented. Take a look at **[the tests](https://github.com/thurn/prelude/blob/master/src/ca/thurn/prelude/PreludeTests.java)** for some examples of what you can do.
 
 This is strictly a just-for-fun educational project for me, so don't expect too much. You can feel free to use the code under the terms of the [Creative Commons Zero](https://creativecommons.org/publicdomain/zero/1.0/legalcode) license if you'd like, though.
